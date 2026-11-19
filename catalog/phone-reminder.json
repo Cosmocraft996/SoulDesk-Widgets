@@ -4,5 +4,18 @@
   "summary": "用灵动通知加语音，提醒重要事项",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.1",
+      "sizeBytes": 3648301,
+      "sha256": "47cbfad2f8329e50e8d870634321ac99b82cc01c08a9b078ee4e16df1f168535",
+      "capabilities": [
+        "reminders.phone"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.0`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-phone-reminder-v0.1.1/local.souldesk.widgetjs.phone-reminder-0.1.1.zip"
+    }
+  ]
 }

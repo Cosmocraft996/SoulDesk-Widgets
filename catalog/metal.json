@@ -4,5 +4,19 @@
   "summary": "金/银/铜/铂金价格，每分钟刷新一次",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.2",
+      "sizeBytes": 16944,
+      "sha256": "e892f818b732aeb88b9339dfe2a92033392eb85d57bd1add561ba4199e1baddd",
+      "capabilities": [
+        "storage.instance",
+        "content.source.metal"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.1`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-metal-v0.1.2/local.souldesk.widgetjs.metal-0.1.2.zip"
+    }
+  ]
 }

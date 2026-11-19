@@ -4,5 +4,19 @@
   "summary": "轮播文件夹内的图片",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.1",
+      "sizeBytes": 27378,
+      "sha256": "c052e4197c810b3c54378113942a229d3cc1d5c2c0f95c7cd464448a24143ca8",
+      "capabilities": [
+        "storage.instance",
+        "media.directory"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.0`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-photo-v0.1.1/local.souldesk.widgetjs.photo-0.1.1.zip"
+    }
+  ]
 }

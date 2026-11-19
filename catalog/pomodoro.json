@@ -4,5 +4,21 @@
   "summary": "高效管理时间，提高专注力",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.3.1",
+      "sizeBytes": 320470,
+      "sha256": "4b430daeb51258e326201c7dfc079ed7ec591d50abd7a83e415f3af69b91a5ad",
+      "capabilities": [
+        "storage.instance",
+        "focus.pomodoro",
+        "storage.shared",
+        "focus.pomodoro.window"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.3.0`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-pomodoro-v0.3.1/local.souldesk.widgetjs.pomodoro-0.3.1.zip"
+    }
+  ]
 }

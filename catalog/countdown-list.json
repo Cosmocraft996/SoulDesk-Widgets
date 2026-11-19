@@ -4,5 +4,19 @@
   "summary": "自动排序的倒计时列表",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.2.2",
+      "sizeBytes": 468237,
+      "sha256": "3625a539bcb43fe6cc85c0c357a68bf7c58eb96388d475c3adb01d9e89d7500a",
+      "capabilities": [
+        "storage.instance",
+        "storage.shared"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.2.1`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-countdown-list-v0.2.2/local.souldesk.widgetjs.countdown-list-0.2.2.zip"
+    }
+  ]
 }

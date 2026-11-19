@@ -4,5 +4,20 @@
   "summary": "每5分钟刷新一次",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.5",
+      "sizeBytes": 217633,
+      "sha256": "3771969f5ddcc17c0c09f519d60edc7effe4ccb518b6ceaadebc35a6af1d1b40",
+      "capabilities": [
+        "storage.instance",
+        "content.source.cls-telegraph",
+        "links.open"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.4`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-hotspot-cls-telegraph-v0.1.5/local.souldesk.widgetjs.hotspot-cls-telegraph-0.1.5.zip"
+    }
+  ]
 }

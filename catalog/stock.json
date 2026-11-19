@@ -4,5 +4,20 @@
   "summary": "跟踪股票价格，每分钟刷新一次",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.2",
+      "sizeBytes": 266106,
+      "sha256": "ee7cb0de333ac168f1b1b101f59e087c58e4f0811af178c20c121cb712e66a6b",
+      "capabilities": [
+        "storage.instance",
+        "content.source.stock-search-eastmoney",
+        "content.source.stock-quote"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.1`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-stock-v0.1.2/local.souldesk.widgetjs.stock-0.1.2.zip"
+    }
+  ]
 }

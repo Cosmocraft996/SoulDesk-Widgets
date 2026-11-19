@@ -4,5 +4,21 @@
   "summary": "实时获取B站推荐视频，发现更多精彩内容",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.5",
+      "sizeBytes": 217643,
+      "sha256": "e49e416b669e3052898b626986e0d2ab89c502c717f2996275ca41d113436e33",
+      "capabilities": [
+        "storage.instance",
+        "content.source.bilibili-rcmd",
+        "images.https",
+        "links.open"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.4`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-hotspot-bilibili-rcmd-v0.1.5/local.souldesk.widgetjs.hotspot-bilibili-rcmd-0.1.5.zip"
+    }
+  ]
 }

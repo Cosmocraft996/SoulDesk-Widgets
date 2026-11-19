@@ -4,5 +4,20 @@
   "summary": "保存常用网站并从桌面快速打开。",
   "category": "桌面工具",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.6",
+      "sizeBytes": 34465,
+      "sha256": "99a08c7ee910bc6d8ff3b6a1f5cee930182507b7b0d219af5f887ab5e9fb8851",
+      "capabilities": [
+        "storage.instance",
+        "links.openWeb",
+        "images.https"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.5`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-website-favorites-v0.1.6/local.souldesk.website-favorites-0.1.6.zip"
+    }
+  ]
 }

@@ -4,5 +4,18 @@
   "summary": "设置间隔，定时提醒，适合长期久坐的人群",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.1",
+      "sizeBytes": 3648260,
+      "sha256": "76f6bbf2f27088fbfbb765d12a10c3459c1b4ac27dd37bc3875efa3644c951b3",
+      "capabilities": [
+        "reminders.sit"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.0`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-sit-reminder-v0.1.1/local.souldesk.widgetjs.sit-reminder-0.1.1.zip"
+    }
+  ]
 }

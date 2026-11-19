@@ -4,5 +4,22 @@
   "summary": "生成流程图、类图、甘特图、时序图等图表",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.5",
+      "sizeBytes": 4315632,
+      "sha256": "aec4cd846df8e24a62983fea5a2cabdd890d1049afec4e55f87185167c307b39",
+      "capabilities": [
+        "storage.instance",
+        "ai.generate",
+        "clipboard.write",
+        "documents.save",
+        "documents.drop"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.4`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-ai-mermaid-v0.1.5/local.souldesk.widgetjs.ai-mermaid-0.1.5.zip"
+    }
+  ]
 }

@@ -4,5 +4,19 @@
   "summary": "将文件整理到窗格中",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.1",
+      "sizeBytes": 289676,
+      "sha256": "01b8eafd2bbc550f8e0f28e7cfae588661d4e9adadfa3bd4bbc27f1806fa2fcc",
+      "capabilities": [
+        "storage.instance",
+        "files.launcher"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.0`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-grid-v0.1.1/local.souldesk.widgetjs.grid-0.1.1.zip"
+    }
+  ]
 }

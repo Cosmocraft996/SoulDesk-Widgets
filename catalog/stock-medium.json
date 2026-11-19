@@ -4,5 +4,19 @@
   "summary": "珍爱生命，远离股市",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.2",
+      "sizeBytes": 14834,
+      "sha256": "0687e2f7fd7bba16c1ec47383f3b75f85bcf18195da5ab1e07d240fa99e30273",
+      "capabilities": [
+        "storage.instance",
+        "content.source.a-index"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.1`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-stock-medium-v0.1.2/local.souldesk.widgetjs.stock-medium-0.1.2.zip"
+    }
+  ]
 }

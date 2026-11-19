@@ -4,5 +4,19 @@
   "summary": "自动倒计时的生日列表",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.2.2",
+      "sizeBytes": 421935,
+      "sha256": "6f724456db9a37af01cc111204069262f8aa01506c94dfd934db03c04b4735fa",
+      "capabilities": [
+        "storage.instance",
+        "storage.shared"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.2.1`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-birthday-list-v0.2.2/local.souldesk.widgetjs.birthday-list-0.2.2.zip"
+    }
+  ]
 }

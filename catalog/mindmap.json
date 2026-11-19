@@ -4,5 +4,27 @@
   "summary": "帮助你整理知识碎片与思绪",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.2.4",
+      "sizeBytes": 1774965,
+      "sha256": "154be548cd4594438b2aa532b9a5a421d50ad1981784aec91cb7149a8e46122d",
+      "capabilities": [
+        "storage.instance",
+        "storage.document",
+        "documents.open",
+        "documents.save",
+        "documents.drop",
+        "assets.scoped",
+        "styles.inline",
+        "images.blob",
+        "assets.fetch",
+        "storage.shared"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.2.3`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-mindmap-v0.2.4/local.souldesk.widgetjs.mindmap-0.2.4.zip"
+    }
+  ]
 }

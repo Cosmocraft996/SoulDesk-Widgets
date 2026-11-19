@@ -4,5 +4,19 @@
   "summary": "实时查看主流虚拟币行情",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.2",
+      "sizeBytes": 61433,
+      "sha256": "b0c6ac43e1301f34e0d276fc052d6a64904f3a5ccb9625d0578933b96344b780",
+      "capabilities": [
+        "storage.instance",
+        "content.live"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.1`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-coin-medium-v0.1.2/local.souldesk.widgetjs.coin-medium-0.1.2.zip"
+    }
+  ]
 }

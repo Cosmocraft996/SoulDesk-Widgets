@@ -4,5 +4,20 @@
   "summary": "打工人，打工魂",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.2",
+      "sizeBytes": 606107,
+      "sha256": "0901cb56827dc2138a636fe1792ddf6f1a4e050138a1c931c7d88c14c795b4bf",
+      "capabilities": [
+        "storage.instance",
+        "reminders.labor",
+        "assets.scoped"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.1`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-labor-v0.1.2/local.souldesk.widgetjs.labor-0.1.2.zip"
+    }
+  ]
 }

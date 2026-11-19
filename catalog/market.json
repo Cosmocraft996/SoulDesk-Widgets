@@ -4,5 +4,20 @@
   "summary": "查看币安公开行情，并在本机配置价格警报。",
   "category": "行情与警报",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.2.1",
+      "sizeBytes": 36553,
+      "sha256": "79ffedaffc5fd6d6639893a0199583c8464a0c2f483b8b223f32493785323a58",
+      "capabilities": [
+        "storage.instance",
+        "market.read",
+        "alerts.manage"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.2.0`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-market-v0.2.1/local.souldesk.market-0.2.1.zip"
+    }
+  ]
 }

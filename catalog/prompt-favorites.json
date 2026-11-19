@@ -4,5 +4,19 @@
   "summary": "新增、编辑、搜索和复制本机提示词收藏。",
   "category": "桌面工具",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.2.3",
+      "sizeBytes": 24646,
+      "sha256": "e54bf4d6bcbc3c585ef0375ae71cc5e38d7ccbde5bd3f275d9eea3be49801cc9",
+      "capabilities": [
+        "storage.instance",
+        "clipboard.write"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.2.2`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-prompt-favorites-v0.2.3/local.souldesk.prompt-favorites-0.2.3.zip"
+    }
+  ]
 }

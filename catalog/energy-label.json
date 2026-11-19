@@ -4,5 +4,19 @@
   "summary": "牛马打工人必备",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.2",
+      "sizeBytes": 21705,
+      "sha256": "34c3c1b346c02e16928546da620f26cd8738257665a48b2fe9b540eedcc79caa",
+      "capabilities": [
+        "storage.instance",
+        "system.metrics"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.1`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-energy-label-v0.1.2/local.souldesk.widgetjs.energy-label-0.1.2.zip"
+    }
+  ]
 }

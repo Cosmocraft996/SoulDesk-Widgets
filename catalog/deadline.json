@@ -4,5 +4,18 @@
   "summary": "最后期限进度条",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.1",
+      "sizeBytes": 103342,
+      "sha256": "ace121a627aa97f7e4e3210709bb208b221bcb263a6f6f1215833d4bd687110f",
+      "capabilities": [
+        "storage.instance"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.0`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-deadline-v0.1.1/local.souldesk.widgetjs.deadline-0.1.1.zip"
+    }
+  ]
 }

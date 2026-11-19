@@ -4,5 +4,19 @@
   "summary": "用AI查找并分析职位信息、模拟面试、生成技能思维导图。",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.1",
+      "sizeBytes": 4301176,
+      "sha256": "a2ce2762c2c18a417f5e62b6cc8a7989d6ab8620197fe3998a01826289a36108",
+      "capabilities": [
+        "jobs.manage",
+        "clipboard.write"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.0`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-ai-job-v0.1.1/local.souldesk.widgetjs.ai-job-0.1.1.zip"
+    }
+  ]
 }

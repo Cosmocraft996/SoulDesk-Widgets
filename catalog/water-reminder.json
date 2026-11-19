@@ -4,5 +4,19 @@
   "summary": "每天N杯水，养成好习惯",
   "category": "桌面组件",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.1",
+      "sizeBytes": 23805,
+      "sha256": "80274c5b85c1d9d65c33e53058295f9eae453c0961591924f820f00f95502b43",
+      "capabilities": [
+        "storage.instance",
+        "reminders.water"
+      ],
+      "minHostVersion": "0.5.5",
+      "status": "published",
+      "releaseNotes": "由 SoulDesk 宿主迁入组件广场。沿用原组件 ID 与实例数据格式。\n\n原宿主包版本为 `0.1.0`。",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-water-reminder-v0.1.1/local.souldesk.widgetjs.water-reminder-0.1.1.zip"
+    }
+  ]
 }
