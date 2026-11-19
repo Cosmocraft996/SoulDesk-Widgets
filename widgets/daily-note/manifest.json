@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "official.souldesk.daily-note",
   "name": "桌面便签",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "hostApiMajor": 1,
   "loadCheck": 1,
   "entry": "dist/index.html",

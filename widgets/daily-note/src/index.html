@@ -9,8 +9,11 @@
 <body>
   <form>
     <header><label for="note">桌面便签</label><button disabled>保存</button></header>
-    <textarea id="note" placeholder="记下一件事…" maxlength="2000" disabled></textarea>
-    <p role="status" id="status">正在读取便签…</p>
+    <textarea id="note" placeholder="记下一件事…" maxlength="2000" aria-describedby="count" disabled></textarea>
+    <footer>
+      <p role="status" id="status">正在读取便签…</p>
+      <span id="count"></span>
+    </footer>
   </form>
   <script type="module" src="./app.js"></script>
 </body>

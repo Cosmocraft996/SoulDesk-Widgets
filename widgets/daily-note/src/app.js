@@ -4,17 +4,24 @@ const form = document.querySelector('form');
 const editor = form.querySelector('textarea');
 const button = form.querySelector('button');
 const status = document.querySelector('#status');
+const count = document.querySelector('#count');
+
+function updateCount() {
+  count.textContent = editor.value.length + ' / ' + editor.maxLength;
+}
 
 async function init() {
   const host = await connectHost();
   const settings = await host.request('settings.get');
   let saved = settings.text ?? '';
   editor.value = saved;
+  updateCount();
   editor.disabled = false;
   status.textContent = '内容保存在当前便签';
   let saving = false;
 
   editor.addEventListener('input', () => {
+    updateCount();
     button.disabled = saving || editor.value === saved;
     if (!saving) status.textContent = button.disabled ? '已保存' : '有未保存的内容';
   });
