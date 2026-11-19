@@ -52,6 +52,8 @@ jobs:
           openssl pkeyutl -sign -rawin -inkey "$key" \
             -in artifacts/site/catalog.json -out artifacts/site/catalog.json.sig
           test "$(wc -c < artifacts/site/catalog.json.sig)" -eq 64
+          openssl pkeyutl -verify -rawin -pubin -inkey docs/catalog-public-key.pem \
+            -in artifacts/site/catalog.json -sigfile artifacts/site/catalog.json.sig
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

@@ -3,6 +3,33 @@
   "name": "桌面便签",
   "summary": "把随手想法、临时备忘放在手边。每张便签各自保存。",
   "category": "效率",
-  "screenshots": ["./images/daily-note.png"],
-  "versions": []
+  "screenshots": [
+    "./images/daily-note.png"
+  ],
+  "versions": [
+    {
+      "version": "0.1.1",
+      "capabilities": [
+        "storage.instance"
+      ],
+      "sizeBytes": 7332,
+      "sha256": "f00faae1af4595e2f549c5528f02a9a96da90327cc18b178eef1674aa1829d4b",
+      "minHostVersion": "0.5.2",
+      "releaseNotes": "编辑时显示已用字数和上限，原有实例的便签正文继续保留。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-daily-note-v0.1.1/official.souldesk.daily-note-0.1.1.zip"
+    },
+    {
+      "version": "0.1.0",
+      "capabilities": [
+        "storage.instance"
+      ],
+      "sizeBytes": 6889,
+      "sha256": "efd7102ca6b716b0ef6f5a622142eb642f3b18c2ddef37632ce2b1ce48caeea3",
+      "minHostVersion": "0.5.2",
+      "releaseNotes": "支持编辑、保存并恢复独立的便签正文。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-daily-note-v0.1.0/official.souldesk.daily-note-0.1.0.zip"
+    }
+  ]
 }

@@ -2,6 +2,8 @@
 
 本仓库维护可独立发版的官方免费组件。GitHub Pages 提供广场网页和目录，GitHub Releases 提供每个版本的 ZIP。SoulDesk 管理窗口中的「导入本地 ZIP」可以直接导入组件。
 
+[官方组件广场](https://cosmocraft996.github.io/SoulDesk-Widgets/) · [组件目录](https://cosmocraft996.github.io/SoulDesk-Widgets/catalog.json)
+
 | 组件 | 权限 | 用途 |
 | --- | --- | --- |
 | [桌面便签](widgets/daily-note/README.md) | `storage.instance` | 在当前实例保存便签文字 |
@@ -36,6 +38,6 @@ python -m http.server 8000 --directory artifacts/preview
 
 ## 目录签名
 
-应用内广场上线前，在受保护的 `github-pages` 发布环境配置 Ed25519 私钥秘密 `CATALOG_SIGNING_KEY`，并将 `CATALOG_SIGNING_REQUIRED` 设为 `true`。Pages 工作流对原始 `catalog.json` 字节签名，输出 64 字节的 `catalog.json.sig`。客户端使用对应的固定公钥和正式目录地址。发布私钥留在受保护的发布环境。
+受保护的 `github-pages` 发布环境用 `CATALOG_SIGNING_KEY` 对原始 `catalog.json` 字节签名，输出 64 字节的 `catalog.json.sig`。工作流发布前使用固定公钥复验。客户端使用同一把公钥和上方的正式目录地址。[Ed25519 公钥](docs/catalog-public-key.pem)
 
 更多实施顺序和验收条件见 [SoulDesk 官方组件广场交付资料](<docs/SoulDesk 官方组件广场交付资料.md>)。
