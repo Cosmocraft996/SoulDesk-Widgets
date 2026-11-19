@@ -1,0 +1,8 @@
+{
+  "id": "official.souldesk.daily-note",
+  "name": "桌面便签",
+  "summary": "把随手想法、临时备忘放在手边。每张便签各自保存。",
+  "category": "效率",
+  "screenshots": ["./images/daily-note.png"],
+  "versions": []
+}

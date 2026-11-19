@@ -1,0 +1,60 @@
+name: 部署官方组件广场
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: official-widget-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 校验线上附件并生成目录与网页
+        env:
+          PUSH_BASE: ${{ github.event.before }}
+        run: |
+          args=()
+          if [[ -n "$PUSH_BASE" && "$PUSH_BASE" != 0000000000000000000000000000000000000000 ]]; then
+            args=(--base "$PUSH_BASE")
+          fi
+          python scripts/catalog.py build --out artifacts/site --verify-downloads "${args[@]}"
+      - name: 使用 Ed25519 签名目录
+        if: vars.CATALOG_SIGNING_REQUIRED == 'true'
+        env:
+          CATALOG_PRIVATE_KEY: ${{ secrets.CATALOG_SIGNING_KEY }}
+        run: |
+          test -n "$CATALOG_PRIVATE_KEY"
+          umask 077
+          key="$(mktemp "$RUNNER_TEMP/catalog-key.XXXXXX")"
+          trap 'unlink "$key"' EXIT
+          printf '%s\n' "$CATALOG_PRIVATE_KEY" > "$key"
+          openssl pkeyutl -sign -rawin -inkey "$key" \
+            -in artifacts/site/catalog.json -out artifacts/site/catalog.json.sig
+          test "$(wc -c < artifacts/site/catalog.json.sig)" -eq 64
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: artifacts/site
+      - uses: actions/deploy-pages@v4
+        id: deploy

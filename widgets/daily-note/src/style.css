@@ -1,0 +1,12 @@
+* { box-sizing: border-box; }
+:root { font: 14px "Microsoft YaHei UI", sans-serif; color: #483827; background: #fff4cf; }
+body { margin: 0; }
+form { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 10px; height: 100dvh; padding: 14px 16px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+label { font: bold 18px "Songti SC", SimSun, serif; }
+textarea { width: 100%; resize: none; border: 1px solid #d7bd83; border-radius: 6px; padding: 8px 10px; font: inherit; line-height: 1.65; background: #fffaea; color: inherit; }
+textarea::placeholder { color: #765e45; }
+button { font: inherit; background: #563c27; color: #fff; cursor: pointer; padding: 4px 12px; border: 1px solid transparent; border-radius: 5px; }
+button:disabled { background: #f2e5be; color: #64543c; cursor: default; }
+:focus-visible { outline: 2px solid #885622; outline-offset: 2px; }
+p { margin: 0; font-size: 12px; min-height: 1.4em; }

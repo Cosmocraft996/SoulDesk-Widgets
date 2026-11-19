@@ -1,0 +1,8 @@
+{
+  "repository": "Cosmocraft996/SoulDesk",
+  "release": "v0.5.2",
+  "commit": "11775d14f69fb0ff89e077193e0df6021c8c8e97",
+  "hostApiMajor": 1,
+  "path": "sdk/host.js",
+  "sha256": "5e7013a8de42462a8c5a687d5a214578e7142abb8fa4df4f4bd59fb711801d3a"
+}

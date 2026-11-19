@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="浏览 SoulDesk 官方组件，按版本下载 ZIP 并导入桌面应用。">
+  <title>官方组件广场 · SoulDesk</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./gallery.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="frame top-inner">
+      <a href="./" class="brand"><span class="brand-mark" aria-hidden="true"></span>SoulDesk</a>
+      <a href="https://github.com/Cosmocraft996/SoulDesk/releases">获取 SoulDesk <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+  <main class="frame">
+    <section class="intro" aria-labelledby="title">
+      <div>
+        <h1 id="title">官方组件广场<span aria-hidden="true">.</span></h1>
+        <p>为你的桌面添加一件顺手的小工具。</p>
+      </div>
+      <p class="import-tip">下载 ZIP 后，在 SoulDesk 的组件管理窗口选择<strong>导入本地 ZIP</strong>。</p>
+    </section>
+    <section aria-labelledby="widgets-title">
+      <div class="section-head">
+        <h2 id="widgets-title">全部组件</h2>
+        <p id="catalog-status" role="status">正在读取目录…</p>
+      </div>
+      <div class="cards" id="widgets"></div>
+      <noscript><p>启用脚本后可以浏览组件，也可以直接读取下方的组件目录。</p></noscript>
+    </section>
+  </main>
+  <footer class="frame">
+    <a href="./catalog.json">组件目录 <span aria-hidden="true">↗</span></a>
+    <a href="https://github.com/Cosmocraft996/SoulDesk-Widgets">组件源码 <span aria-hidden="true">↗</span></a>
+  </footer>
+</body>
+</html>

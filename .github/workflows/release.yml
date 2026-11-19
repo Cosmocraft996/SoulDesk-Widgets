@@ -1,0 +1,42 @@
+name: 生成组件 Release 草稿
+
+on:
+  push:
+    tags: ['widget-*-v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: widget-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    if: github.event.deleted == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 构建并校验标签对应的组件
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          git merge-base --is-ancestor HEAD origin/main
+          python scripts/widget.py --tag "$TAG"
+      - name: 上传草稿附件
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          zip=(artifacts/widgets/*.zip)
+          notes=(artifacts/widgets/*.md)
+          sha=(artifacts/widgets/*.sha256)
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --latest=false \
+            --title "$TAG" --notes-file "${notes[0]}" "${zip[0]}" "${sha[0]}"

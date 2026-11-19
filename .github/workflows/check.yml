@@ -1,0 +1,36 @@
+name: 组件与目录检查
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 校验组件包与已发布目录
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE: ${{ github.event.before }}
+        run: |
+          args=()
+          base="$PUSH_BASE"
+          if [[ -n "$PR_BASE" ]]; then
+            base="$(git merge-base "$PR_BASE" "$PR_HEAD")"
+          fi
+          if [[ -n "$base" && "$base" != 0000000000000000000000000000000000000000 ]]; then
+            args=(--base "$base")
+          fi
+          python scripts/widget.py "${args[@]}"
+          python scripts/catalog.py build --out artifacts/site --verify-downloads "${args[@]}"
