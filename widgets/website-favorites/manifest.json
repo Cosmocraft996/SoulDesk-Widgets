@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "local.souldesk.website-favorites",
+  "name": "网站收藏夹",
+  "version": "0.1.6",
+  "hostApiMajor": 1,
+  "loadCheck": 1,
+  "entry": "dist/index.html",
+  "defaultSize": {
+    "width": 320,
+    "height": 218
+  },
+  "minSize": {
+    "width": 240,
+    "height": 186
+  },
+  "capabilities": [
+    "storage.instance",
+    "links.openWeb",
+    "images.https"
+  ],
+  "settingsSchema": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  }
+}

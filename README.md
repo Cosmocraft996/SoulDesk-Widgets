@@ -9,6 +9,13 @@
 | [桌面便签](widgets/daily-note/README.md) | `storage.instance` | 在当前实例保存便签文字 |
 | [本地时钟](widgets/local-clock/README.md) | 无 | 显示电脑本地时间、日期和星期 |
 
+## 仓库分工
+
+- 组件广场维护 `widgets/` 的独立组件、`catalog/` 的收录记录和站点发布。迁入的既有组件沿用原 ID，供宿主的已有实例升级。
+- [SoulDesk 宿主](https://github.com/Cosmocraft996/SoulDesk) 维护 Windows 运行时、SDK、宿主能力和隔离验证。
+- [组件开发 Skill](https://github.com/Cosmocraft996/Souldesk-Widget-Skill) 维护 AI 生成及验证工作流。在以宿主为主目录的 Codex 项目里选用 `$souldesk-widget`，明确在广场仓库创建或更新组件。
+- 多组件共享或由 Vite 构建的迁移源与构建入口保存在 `source/widgetjs-port/`；各组件当前独立安装资源在 `widgets/<目录>/src/`。目录项中的空版本列表表示源码已经迁入，等待发版和收录。
+
 ## 本地构建
 
 使用 Python 3.12。构建脚本没有第三方依赖，首次运行会从宿主仓库拉取锁定的 SDK 并校验 SHA-256。离线时可提供相同版本的 SDK 文件。

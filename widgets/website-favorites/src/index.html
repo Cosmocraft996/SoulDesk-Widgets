@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>网站收藏夹</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <main class="board">
+    <header class="heading">
+      <h1>网站收藏夹</h1>
+      <div class="toolbar">
+        <div id="view-mode" class="view-mode" role="group" aria-label="收藏布局">
+          <button class="tool" type="button" data-layout="grid" title="网格视图" aria-label="网格视图" aria-pressed="true" disabled><span class="icon icon-grid" aria-hidden="true"></span></button>
+          <button class="tool" type="button" data-layout="list" title="列表视图" aria-label="列表视图" aria-pressed="false" disabled><span class="icon icon-list" aria-hidden="true"></span></button>
+        </div>
+        <button id="add" class="tool add" type="button" title="添加网站" aria-label="添加网站" disabled><span class="icon icon-plus" aria-hidden="true"></span></button>
+      </div>
+    </header>
+    <div id="collection" class="collection">
+      <ul id="sites" class="sites" data-layout="grid" aria-label="收藏的网站"></ul>
+      <p id="empty" class="empty">正在加载收藏…</p>
+    </div>
+    <p id="status" class="status" role="status"></p>
+  </main>
+
+  <template id="site-template">
+    <li class="site">
+      <button class="site-open" type="button">
+        <span class="site-icon" aria-hidden="true"><span class="monogram"></span></span>
+        <span class="site-label">
+          <span class="site-name"></span>
+          <span class="site-domain" aria-hidden="true"></span>
+        </span>
+      </button>
+      <button class="site-more" type="button" aria-controls="actions" aria-expanded="false"><span aria-hidden="true">⋯</span></button>
+    </li>
+  </template>
+  <div id="actions" class="actions" role="group" aria-label="收藏操作" hidden>
+    <button id="move-top" type="button"><span aria-hidden="true">↑</span> 移到顶部</button>
+    <button id="move-bottom" type="button"><span aria-hidden="true">↓</span> 移到底部</button>
+    <button id="edit" type="button"><span aria-hidden="true">✎</span> 编辑网站</button>
+    <button id="remove" class="danger" type="button"><span aria-hidden="true">×</span> 删除收藏</button>
+  </div>
+
+  <dialog id="editor" aria-labelledby="editor-title">
+    <form id="form">
+      <h2 id="editor-title">添加网站</h2>
+      <label>网址<input id="address" type="text" inputmode="url" autocomplete="off" spellcheck="false" required maxlength="4096" placeholder="example.com 或 192.168.1.10:8080" autofocus></label>
+      <label>名称<input id="name" type="text" autocomplete="off" maxlength="64" placeholder="留空显示域名"></label>
+      <p id="editor-status" class="error" role="status"></p>
+      <div class="dialog-buttons">
+        <button id="cancel" type="button">取消</button>
+        <button class="primary" type="submit">保存</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog id="confirmation" aria-labelledby="delete-title">
+    <h2 id="delete-title">删除收藏</h2>
+    <p>删除「<strong id="delete-name"></strong>」？</p>
+    <p id="delete-status" class="error" role="status"></p>
+    <div class="dialog-buttons">
+      <button id="keep" type="button" autofocus>取消</button>
+      <button id="confirm-remove" class="danger" type="button">删除</button>
+    </div>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "id": "local.souldesk.widgetjs.base-panel",
+  "name": "监控面板",
+  "summary": "显示CPU、内存、磁盘等硬件负载信息",
+  "category": "桌面组件",
+  "screenshots": [],
+  "versions": []
+}

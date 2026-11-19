@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "local.souldesk.prompt-favorites",
+  "name": "Prompt 收藏夹",
+  "version": "0.2.3",
+  "hostApiMajor": 1,
+  "loadCheck": 1,
+  "entry": "dist/index.html",
+  "defaultSize": {
+    "width": 420,
+    "height": 420
+  },
+  "minSize": {
+    "width": 290,
+    "height": 280
+  },
+  "capabilities": [
+    "storage.instance",
+    "clipboard.write"
+  ],
+  "settingsSchema": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  }
+}

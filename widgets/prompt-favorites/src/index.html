@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompt 收藏夹</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main aria-label="Prompt 收藏夹">
+    <header>
+      <input id="search" type="search" aria-label="搜索提示词" placeholder="搜索提示词" disabled>
+      <button id="add" type="button" aria-label="新增收藏" title="新增收藏" disabled></button>
+    </header>
+    <section class="collection" aria-label="收藏列表">
+      <p id="empty">正在加载…</p>
+      <ul id="list"></ul>
+    </section>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </main>
+
+  <div id="preview" class="overlay" aria-hidden="true" hidden></div>
+  <div id="actions" class="overlay" role="group" aria-label="收藏操作" hidden>
+    <button id="edit" type="button">编辑</button>
+    <button id="move-top" type="button">移到顶部</button>
+    <button id="move-bottom" type="button">移到底部</button>
+    <button id="menu-delete" class="danger" type="button">删除</button>
+  </div>
+
+  <dialog id="editor" aria-labelledby="editor-title">
+    <form id="form">
+      <h2 id="editor-title"></h2>
+      <label>提示词<textarea id="body" rows="5" spellcheck="false" required></textarea></label>
+      <p id="editor-status" class="status" role="status"></p>
+      <footer>
+        <button id="ask-delete" class="danger" type="button">删除</button>
+        <button id="cancel" type="button">取消</button>
+        <button id="save" class="primary" type="submit">保存</button>
+      </footer>
+    </form>
+  </dialog>
+  <dialog id="confirmation" aria-labelledby="confirmation-title">
+    <div class="confirm-content">
+      <h2 id="confirmation-title">删除这条收藏？</h2>
+      <p id="delete-preview"></p>
+      <p id="delete-status" class="status" role="status"></p>
+      <footer>
+        <button id="keep" type="button" autofocus>保留</button>
+        <button id="remove" class="danger" type="button">确认删除</button>
+      </footer>
+    </div>
+  </dialog>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

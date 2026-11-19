@@ -20,7 +20,7 @@ MAX_EXPANDED = 50 * 1024 * 1024
 VERSION = r"(?:0|[1-9][0-9]{0,9})(?:\.(?:0|[1-9][0-9]{0,9})){2}"
 SLUG = r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*"
 ID = r"(?=.{3,80}$)[a-z0-9-]+(?:\.[a-z0-9-]+)+"
-EXTENSIONS = set(".html .css .js .mjs .json .png .jpg .jpeg .gif .webp .svg .ico .woff .woff2 .ttf .txt .map .mp3".split())
+EXTENSIONS = set(".html .css .js .mjs .json .png .jpg .jpeg .gif .webp .svg .ico .woff .woff2 .ttf .txt .map .mp3 .m4a .wav".split())
 RESERVED = {"con", "prn", "aux", "nul", *(f"{prefix}{index}" for prefix in ("com", "lpt") for index in range(1, 10))}
 LOCK_PATH = ROOT / "sdk.lock.json"
 
@@ -94,7 +94,7 @@ def validate_manifest(manifest, slug=None):
     require(isinstance(entry, str) and entry.startswith("dist/") and entry.endswith(".html"), "无效入口")
     capabilities = manifest.get("capabilities")
     require(isinstance(capabilities, list)
-            and all(isinstance(item, str) and re.fullmatch(r"[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+", item)
+            and all(isinstance(item, str) and re.fullmatch(r"[a-z][a-zA-Z0-9_-]*(?:\.[a-z][a-zA-Z0-9_-]*)+", item)
                     for item in capabilities)
             and len(set(capabilities)) == len(capabilities), "清单权限无效或重复")
     for field in ("defaultSize", "minSize"):
@@ -118,7 +118,7 @@ def check_path(name):
 
 def resolve_asset(source, ref, files):
     url = urlsplit(ref)
-    if ref.startswith("#"):
+    if unquote(ref).startswith("#") or re.match(r"data:(?:(?:image|font)/|application/x-font-ttf[;,])", ref, re.I):
         return
     require(not url.scheme and not url.netloc and not url.path.startswith("/") and "\\" not in ref,
             f"{source} 的资源必须使用相对路径：{ref}")
@@ -191,7 +191,11 @@ def inspect_zip(data):
             for ref in re.findall(r"""url\(\s*['"]?([^)'"]+)['"]?\s*\)|@import\s+['"]([^'"]+)""", css):
                 resolve_asset(name, (ref[0] or ref[1]).strip(), files)
         if name.endswith((".js", ".mjs")) and name != "dist/host.js":
-            for ref in re.findall(r"""(?:\bfrom\s*|\bimport\s*(?:\(\s*)?)['"]([^'"]+)['"]""", content.decode("utf-8")):
+            # 引入检查覆盖源文件顶层导入，跳过打包器内嵌的文本与代码示例。
+            imports = re.findall(r"""^\s*import\s+(?:(?:[^
+;]+?)\s+from\s+)?['"]([^'"]+)['"]""",
+                                 content.decode("utf-8"), re.M)
+            for ref in imports:
                 require(ref.startswith(("./", "../")), f"{name} 的脚本导入必须是相对路径：{ref}")
                 resolve_asset(name, ref, files)
     return manifest
@@ -218,10 +222,12 @@ def build(slug, sdk):
             files[name] = data
     target = io.BytesIO()
     # 固定元数据和顺序，轻量组件跨操作系统产生逐字节相同的 ZIP。
-    with ZipFile(target, "w") as archive:
+    compression = ZIP_DEFLATED if sum(map(len, files.values())) >= MAX_ZIP else ZIP_STORED
+    with ZipFile(target, "w", compression=compression, compresslevel=9) as archive:
         for name, data in sorted(files.items()):
             entry = ZipInfo(name, date_time=(2020, 1, 1, 0, 0, 0))
             entry.create_system = 3
+            entry.compress_type = compression
             archive.writestr(entry, data)
     data = target.getvalue()
     inspect_zip(data)

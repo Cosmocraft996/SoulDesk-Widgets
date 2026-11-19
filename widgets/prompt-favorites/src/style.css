@@ -1,0 +1,143 @@
+:root {
+  color-scheme: dark;
+  font: 13px/1.4 'Microsoft YaHei UI', 'Segoe UI', sans-serif;
+  color: #eaf0f3;
+  background: #182126;
+  --paper: #202b31;
+  --line: #394950;
+  --muted: #a8b8bb;
+  --accent: #d7eea2;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { height: 100dvh; margin: 0; }
+main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 5px;
+  height: 100%;
+  padding: 7px 8px 3px;
+  border-top: 2px solid #748e56;
+}
+header, footer { display: flex; align-items: center; gap: 6px; }
+/* 搜索放在宿主悬浮工具栏下方，避免鼠标移入时挡住输入区。 */
+header { position: relative; padding-top: 28px; }
+h2, p { margin: 0; }
+h2 { font-size: 14px; }
+
+button, input, textarea {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--paper);
+  color: inherit;
+  font: inherit;
+}
+button { min-height: 28px; padding: 3px 9px; white-space: nowrap; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button:disabled { opacity: .55; cursor: default; }
+.primary { border-color: transparent; background: var(--accent); color: #243318; font-weight: 700; }
+.primary:hover { background: #e8f7c5; }
+.danger { color: #ffbeb3; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+input, textarea { width: 100%; padding: 5px 8px; }
+input::placeholder { color: var(--muted); }
+textarea { min-height: 3em; resize: vertical; }
+
+#search { flex: 1; min-width: 0; height: 28px; }
+#add {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-color: #465951;
+  border-radius: 50%;
+  color: #cfddd3;
+  place-items: center;
+}
+#add::before, #add::after {
+  content: '';
+  grid-area: 1 / 1;
+  border-radius: 1px;
+  background: currentColor;
+}
+#add::before { width: 12px; height: 2px; }
+#add::after { width: 2px; height: 12px; }
+#add:not(:disabled):hover {
+  border-color: #8ca674;
+  background: #334438;
+  color: var(--accent);
+}
+
+.collection { min-height: 0; overflow: auto; scrollbar-width: thin; }
+#empty { padding: 12px 7px; border-top: 1px dashed var(--line); color: var(--muted); }
+#list { position: relative; margin: 0; padding: 0; list-style: none; }
+#list li { border-bottom: 1px solid #304047; }
+#list li:last-child { border-bottom-color: transparent; }
+.prompt {
+  display: block;
+  width: 100%;
+  min-height: 26px;
+  padding: 3px 7px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+}
+.prompt:hover, .prompt:focus-visible { background: #26363c; }
+.sorting, .sorting .prompt { cursor: grabbing; }
+.placeholder { background: #d7eea219; }
+.placeholder .prompt { visibility: hidden; }
+.drag-ghost {
+  position: fixed;
+  z-index: 3;
+  pointer-events: none;
+  border-color: #90a96d;
+  background: #26363c;
+  box-shadow: 0 5px 16px #0b1217ad;
+}
+.status { min-height: 1.2em; color: var(--accent); font-size: 11px; }
+
+.overlay {
+  position: fixed;
+  z-index: 2;
+  border: 1px solid #52656d;
+  border-radius: 6px;
+  background: #202b31;
+  box-shadow: 0 6px 18px #0b1217b0;
+}
+#preview {
+  padding: 7px 9px;
+  overflow: auto;
+  pointer-events: none;
+  scrollbar-width: thin;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+#actions { display: grid; min-width: 104px; padding: 3px; }
+#actions button { border-color: transparent; text-align: left; }
+#actions button:not(:disabled):hover, #actions button:focus-visible { background: #304249; }
+
+dialog {
+  width: min(370px, calc(100% - 20px));
+  max-height: calc(100% - 20px);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #182126;
+  color: inherit;
+}
+dialog::backdrop { background: #10161aca; }
+form, .confirm-content { display: grid; gap: 8px; padding: 12px; }
+label { display: grid; gap: 3px; }
+footer { justify-content: flex-end; }
+#ask-delete { margin-right: auto; }
+#delete-preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

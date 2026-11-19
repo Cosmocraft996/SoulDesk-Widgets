@@ -1,0 +1,5 @@
+# 生日列表
+
+自动倒计时的生日列表
+
+组件 ID `local.souldesk.widgetjs.birthday-list`。宿主通过清单声明的能力提供服务。

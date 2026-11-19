@@ -1,0 +1,32 @@
+name: 发布宿主迁入的组件
+
+on:
+  push:
+    tags: ['components-migration-0.5.5']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-migrated-components
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 核对迁入版本并发布通过宿主验收的包
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git merge-base --is-ancestor HEAD origin/main
+          python scripts/publish-migration.py --out "$RUNNER_TEMP/migrated-widgets" --publish

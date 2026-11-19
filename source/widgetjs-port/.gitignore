@@ -1,0 +1,5 @@
+node_modules/
+artifacts/
+components/widgetjs/excalidraw-bundle/*
+!components/widgetjs/excalidraw-bundle/preset.zip
+components/widgetjs/build-state.json.pending

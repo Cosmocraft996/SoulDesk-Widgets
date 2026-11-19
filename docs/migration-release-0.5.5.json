@@ -1,0 +1,366 @@
+{
+  "evidence": "Windows 0.5.5 Release 构建隔离隐藏试加载，初始包登记成功；业务交互另行验收",
+  "hostVersion": "0.5.5",
+  "widgets": {
+    "ai-assistant": {
+      "id": "local.souldesk.widgetjs.ai-assistant",
+      "sha256": "de53e4421de323609087948f4898afdf1476f49bfcd57d5960333c49f8918b8e",
+      "sizeBytes": 1712066,
+      "version": "0.1.3"
+    },
+    "ai-job": {
+      "id": "local.souldesk.widgetjs.ai-job",
+      "sha256": "a2ce2762c2c18a417f5e62b6cc8a7989d6ab8620197fe3998a01826289a36108",
+      "sizeBytes": 4301176,
+      "version": "0.1.1"
+    },
+    "ai-mermaid": {
+      "id": "local.souldesk.widgetjs.ai-mermaid",
+      "sha256": "aec4cd846df8e24a62983fea5a2cabdd890d1049afec4e55f87185167c307b39",
+      "sizeBytes": 4315632,
+      "version": "0.1.5"
+    },
+    "ai-mindmap": {
+      "id": "local.souldesk.widgetjs.ai-mindmap",
+      "sha256": "b924fb1810852a9f40b2f9772347d6182ce295a413ba74442774930269061f78",
+      "sizeBytes": 2253885,
+      "version": "0.1.5"
+    },
+    "ai-translate": {
+      "id": "local.souldesk.widgetjs.ai-translate",
+      "sha256": "d277b5efd956d8b7f8b5e25042d7d7a329abd2697939dc500cb6219356082654",
+      "sizeBytes": 1447946,
+      "version": "0.1.4"
+    },
+    "base-panel": {
+      "id": "local.souldesk.widgetjs.base-panel",
+      "sha256": "71fe12dc3d88418a63140bc4d7d02354ceb00d00d514d99ffc320bc8945ebeab",
+      "sizeBytes": 23848,
+      "version": "0.1.2"
+    },
+    "birthday-list": {
+      "id": "local.souldesk.widgetjs.birthday-list",
+      "sha256": "6f724456db9a37af01cc111204069262f8aa01506c94dfd934db03c04b4735fa",
+      "sizeBytes": 421935,
+      "version": "0.2.2"
+    },
+    "calendar": {
+      "id": "local.souldesk.widgetjs.calendar",
+      "sha256": "ffd7163915152209c4458ca1682b013188b5d6757b17ac1bedd910c1d927f4bb",
+      "sizeBytes": 406043,
+      "version": "0.1.3"
+    },
+    "calendar-large": {
+      "id": "local.souldesk.widgetjs.calendar-large",
+      "sha256": "d526e0b878c556bd1c3ff7b58b5fdcca76479bfbd944e3fa8a644d080b53a687",
+      "sizeBytes": 803139,
+      "version": "0.2.4"
+    },
+    "clipboard": {
+      "id": "local.souldesk.widgetjs.clipboard",
+      "sha256": "0abacafdf2e6e961576f16060d0def2f090ddf55b6d79b0134d502681cba4fc2",
+      "sizeBytes": 1421258,
+      "version": "0.1.3"
+    },
+    "clipboard-search": {
+      "id": "local.souldesk.widgetjs.clipboard-search",
+      "sha256": "9ca32f31a669a1da9bc103e9f8b9074cb4e022f283cb638c88c4d4d14463e65b",
+      "sizeBytes": 2347285,
+      "version": "0.1.3"
+    },
+    "clock": {
+      "id": "local.souldesk.widgetjs.clock",
+      "sha256": "defc8cdf40d21fa7cbc6526f860230eb0d7184a1a3b2c11fd769470b3e4ccfae",
+      "sizeBytes": 634269,
+      "version": "0.1.4"
+    },
+    "coin-medium": {
+      "id": "local.souldesk.widgetjs.coin-medium",
+      "sha256": "b0c6ac43e1301f34e0d276fc052d6a64904f3a5ccb9625d0578933b96344b780",
+      "sizeBytes": 61433,
+      "version": "0.1.2"
+    },
+    "coin-small": {
+      "id": "local.souldesk.widgetjs.coin-small",
+      "sha256": "98d7784191d9a7d2d9a0d573676e1e4c7859d66c1cdadae8bbc53e9ce7b71fbe",
+      "sizeBytes": 33199,
+      "version": "0.1.2"
+    },
+    "convert": {
+      "id": "local.souldesk.widgetjs.convert",
+      "sha256": "4ee8e6506785d02d8e4e4b802954b603c7b37ac0f428013868413c09ae11d708",
+      "sizeBytes": 1452378,
+      "version": "0.1.3"
+    },
+    "countdown": {
+      "id": "local.souldesk.widgetjs.countdown",
+      "sha256": "46e43cf681cf225da10f131d3b6ad5a4184bba2d2324f6a5d2131c3c67f23959",
+      "sizeBytes": 468185,
+      "version": "0.2.2"
+    },
+    "countdown-list": {
+      "id": "local.souldesk.widgetjs.countdown-list",
+      "sha256": "3625a539bcb43fe6cc85c0c357a68bf7c58eb96388d475c3adb01d9e89d7500a",
+      "sizeBytes": 468237,
+      "version": "0.2.2"
+    },
+    "deadline": {
+      "id": "local.souldesk.widgetjs.deadline",
+      "sha256": "ace121a627aa97f7e4e3210709bb208b221bcb263a6f6f1215833d4bd687110f",
+      "sizeBytes": 103342,
+      "version": "0.1.1"
+    },
+    "dynamic-island": {
+      "id": "local.souldesk.widgetjs.dynamic-island",
+      "sha256": "c37abdfa994deaf63e68f493cc0567002a7723728269c906bb421b5f22a251af",
+      "sizeBytes": 3648323,
+      "version": "0.1.1"
+    },
+    "energy-label": {
+      "id": "local.souldesk.widgetjs.energy-label",
+      "sha256": "34c3c1b346c02e16928546da620f26cd8738257665a48b2fe9b540eedcc79caa",
+      "sizeBytes": 21705,
+      "version": "0.1.2"
+    },
+    "excalidraw": {
+      "id": "local.souldesk.widgetjs.excalidraw",
+      "sha256": "4ac0b06ff64ca5b767994d2bf61bff5fdf22890d160980ee726ee8751d8dd02a",
+      "sizeBytes": 16573174,
+      "version": "0.1.3"
+    },
+    "flip-clock": {
+      "id": "local.souldesk.widgetjs.flip-clock",
+      "sha256": "13c250d3a4330a59962d1c884b8279325c7792bc47ce73196066197e1cf31ca2",
+      "sizeBytes": 633999,
+      "version": "0.1.4"
+    },
+    "forex": {
+      "id": "local.souldesk.widgetjs.forex",
+      "sha256": "9f998d6b4957ad8383e6720e1c3bc177a4b56ea1d1a8629b70cc742f92019343",
+      "sizeBytes": 25041,
+      "version": "0.1.3"
+    },
+    "glitch-clock": {
+      "id": "local.souldesk.widgetjs.glitch-clock",
+      "sha256": "cc965efd77e162e65a3ca1e285ac8e694ece4cefa7e79a4bdb6aaf0171b7c78d",
+      "sizeBytes": 634007,
+      "version": "0.1.4"
+    },
+    "gold": {
+      "id": "local.souldesk.widgetjs.gold",
+      "sha256": "183a3d900d61c01c14d7e192f12043d8e3f37654d2b8a01a1ce3b06939fa2285",
+      "sizeBytes": 20291,
+      "version": "0.1.2"
+    },
+    "grid": {
+      "id": "local.souldesk.widgetjs.grid",
+      "sha256": "01b8eafd2bbc550f8e0f28e7cfae588661d4e9adadfa3bd4bbc27f1806fa2fcc",
+      "sizeBytes": 289676,
+      "version": "0.1.1"
+    },
+    "hotspot-bangumi": {
+      "id": "local.souldesk.widgetjs.hotspot-bangumi",
+      "sha256": "215ba6aab862181363cc1824a3e82dca22e138ba4c13ffb07c709f68844a6110",
+      "sizeBytes": 217637,
+      "version": "0.1.5"
+    },
+    "hotspot-bilibili": {
+      "id": "local.souldesk.widgetjs.hotspot-bilibili",
+      "sha256": "1a7c59f5ceb8b2cbc8ac80819e4df1f64551aef7e01cbb817fcb70850ce8058e",
+      "sizeBytes": 217631,
+      "version": "0.1.5"
+    },
+    "hotspot-bilibili-rcmd": {
+      "id": "local.souldesk.widgetjs.hotspot-bilibili-rcmd",
+      "sha256": "e49e416b669e3052898b626986e0d2ab89c502c717f2996275ca41d113436e33",
+      "sizeBytes": 217643,
+      "version": "0.1.5"
+    },
+    "hotspot-cls-telegraph": {
+      "id": "local.souldesk.widgetjs.hotspot-cls-telegraph",
+      "sha256": "3771969f5ddcc17c0c09f519d60edc7effe4ccb518b6ceaadebc35a6af1d1b40",
+      "sizeBytes": 217633,
+      "version": "0.1.5"
+    },
+    "hotspot-douyin": {
+      "id": "local.souldesk.widgetjs.hotspot-douyin",
+      "sha256": "1fa04141414178af8fe7db5d1eeedbe0c2096f513d49fcc23c44400a2f2d79a0",
+      "sizeBytes": 217599,
+      "version": "0.1.5"
+    },
+    "hotspot-tou-tiao": {
+      "id": "local.souldesk.widgetjs.hotspot-tou-tiao",
+      "sha256": "b3740004835e1eab9d26bbf3c2a433fa900c19add8a2f37b1c2eb35d923c57ae",
+      "sizeBytes": 217627,
+      "version": "0.1.5"
+    },
+    "hotspot-weibo": {
+      "id": "local.souldesk.widgetjs.hotspot-weibo",
+      "sha256": "586269323a307be7b08ea44342d85f2233aa67474ec74b5f94d260f473ccc096",
+      "sizeBytes": 217596,
+      "version": "0.1.5"
+    },
+    "hotspot-zhihu": {
+      "id": "local.souldesk.widgetjs.hotspot-zhihu",
+      "sha256": "6c4c2dca73c67fa602db7d19a08d65ea25b0f13cf55c0a094a223001e9a710b8",
+      "sizeBytes": 217583,
+      "version": "0.1.5"
+    },
+    "key-stroke": {
+      "id": "local.souldesk.widgetjs.key-stroke",
+      "sha256": "4d3aaf997df8fb6776e6d56b875e1e604874cfd122b06763d5205ec581bc85aa",
+      "sizeBytes": 79120,
+      "version": "0.1.1"
+    },
+    "labor": {
+      "id": "local.souldesk.widgetjs.labor",
+      "sha256": "0901cb56827dc2138a636fe1792ddf6f1a4e050138a1c931c7d88c14c795b4bf",
+      "sizeBytes": 606107,
+      "version": "0.1.2"
+    },
+    "market": {
+      "id": "local.souldesk.market",
+      "sha256": "79ffedaffc5fd6d6639893a0199583c8464a0c2f483b8b223f32493785323a58",
+      "sizeBytes": 36553,
+      "version": "0.2.1"
+    },
+    "metal": {
+      "id": "local.souldesk.widgetjs.metal",
+      "sha256": "e892f818b732aeb88b9339dfe2a92033392eb85d57bd1add561ba4199e1baddd",
+      "sizeBytes": 16944,
+      "version": "0.1.2"
+    },
+    "mickey-clock": {
+      "id": "local.souldesk.widgetjs.mickey-clock",
+      "sha256": "f48a939e629aa9744d44b02b20de726cc8259d3e92cd7b65807b57ea4be5d5a1",
+      "sizeBytes": 634013,
+      "version": "0.1.4"
+    },
+    "mindmap": {
+      "id": "local.souldesk.widgetjs.mindmap",
+      "sha256": "154be548cd4594438b2aa532b9a5a421d50ad1981784aec91cb7149a8e46122d",
+      "sizeBytes": 1774965,
+      "version": "0.2.4"
+    },
+    "note": {
+      "id": "local.souldesk.widgetjs.note",
+      "sha256": "c45e27250f80aca0a200b7f91ff22a07dffe4c3538d1edee72040093843add51",
+      "sizeBytes": 12521,
+      "version": "0.1.1"
+    },
+    "phone-reminder": {
+      "id": "local.souldesk.widgetjs.phone-reminder",
+      "sha256": "47cbfad2f8329e50e8d870634321ac99b82cc01c08a9b078ee4e16df1f168535",
+      "sizeBytes": 3648301,
+      "version": "0.1.1"
+    },
+    "photo": {
+      "id": "local.souldesk.widgetjs.photo",
+      "sha256": "c052e4197c810b3c54378113942a229d3cc1d5c2c0f95c7cd464448a24143ca8",
+      "sizeBytes": 27378,
+      "version": "0.1.1"
+    },
+    "pomodoro": {
+      "id": "local.souldesk.widgetjs.pomodoro",
+      "sha256": "4b430daeb51258e326201c7dfc079ed7ec591d50abd7a83e415f3af69b91a5ad",
+      "sizeBytes": 320470,
+      "version": "0.3.1"
+    },
+    "prompt-favorites": {
+      "id": "local.souldesk.prompt-favorites",
+      "sha256": "e54bf4d6bcbc3c585ef0375ae71cc5e38d7ccbde5bd3f275d9eea3be49801cc9",
+      "sizeBytes": 24646,
+      "version": "0.2.3"
+    },
+    "server": {
+      "id": "local.souldesk.widgetjs.server",
+      "sha256": "051e114f03e442336223b4377d626e78cba87fe2e81ce541aaadbd25ab836b28",
+      "sizeBytes": 607131,
+      "version": "0.1.3"
+    },
+    "sit-reminder": {
+      "id": "local.souldesk.widgetjs.sit-reminder",
+      "sha256": "76f6bbf2f27088fbfbb765d12a10c3459c1b4ac27dd37bc3875efa3644c951b3",
+      "sizeBytes": 3648260,
+      "version": "0.1.1"
+    },
+    "sticker": {
+      "id": "local.souldesk.widgetjs.sticker",
+      "sha256": "6fdf0379338767e3d17734d79556d87d371165b4255c558241fcf72bc6690f9c",
+      "sizeBytes": 24481,
+      "version": "0.1.3"
+    },
+    "stock": {
+      "id": "local.souldesk.widgetjs.stock",
+      "sha256": "ee7cb0de333ac168f1b1b101f59e087c58e4f0811af178c20c121cb712e66a6b",
+      "sizeBytes": 266106,
+      "version": "0.1.2"
+    },
+    "stock-medium": {
+      "id": "local.souldesk.widgetjs.stock-medium",
+      "sha256": "0687e2f7fd7bba16c1ec47383f3b75f85bcf18195da5ab1e07d240fa99e30273",
+      "sizeBytes": 14834,
+      "version": "0.1.2"
+    },
+    "stock-small": {
+      "id": "local.souldesk.widgetjs.stock-small",
+      "sha256": "a5333eb512ecbcf2df1dcc8fea2cb449df2a5f0a9656f2df0572487ce8485ba3",
+      "sizeBytes": 21609,
+      "version": "0.1.2"
+    },
+    "text-clock": {
+      "id": "local.souldesk.widgetjs.text-clock",
+      "sha256": "b72a0233c3c232e623864a10d8e7f1b8fb54b46cf94b3e20b5fd27563ed7d33e",
+      "sizeBytes": 634152,
+      "version": "0.1.4"
+    },
+    "time-progress": {
+      "id": "local.souldesk.widgetjs.time-progress",
+      "sha256": "2434702b7e03b2f9254d03ac909d9c0b76ee7d48f8b4121e26e8550bd01d9eb8",
+      "sizeBytes": 40960,
+      "version": "0.1.1"
+    },
+    "todo": {
+      "id": "local.souldesk.widgetjs.todo",
+      "sha256": "8d5a9d431a555102c5142e4450e96a7c89cd90a165381466d8c749ee33fa3490",
+      "sizeBytes": 133969,
+      "version": "0.2.2"
+    },
+    "water-reminder": {
+      "id": "local.souldesk.widgetjs.water-reminder",
+      "sha256": "80274c5b85c1d9d65c33e53058295f9eae453c0961591924f820f00f95502b43",
+      "sizeBytes": 23805,
+      "version": "0.1.1"
+    },
+    "wave-progress": {
+      "id": "local.souldesk.widgetjs.wave-progress",
+      "sha256": "1e6cea1d757a98a4493f583a01986e1694bffd16799ceb04bea4de1318807979",
+      "sizeBytes": 41865,
+      "version": "0.1.1"
+    },
+    "weather-large": {
+      "id": "local.souldesk.widgetjs.weather-large",
+      "sha256": "ff4ff5bbdf5565623c21a25a32270134d0c6410f356dc52f2f73f99ad9373812",
+      "sizeBytes": 1012781,
+      "version": "0.1.1"
+    },
+    "weather-medium": {
+      "id": "local.souldesk.widgetjs.weather-medium",
+      "sha256": "99f966471e6eff8d6a5ea68715ee95503dfa15d0d7cb0fd1ef33c893cd849a4f",
+      "sizeBytes": 1012784,
+      "version": "0.1.1"
+    },
+    "weather-small": {
+      "id": "local.souldesk.widgetjs.weather-small",
+      "sha256": "b74e0c05133a753baeeabdda023fafc40c8c39f30595b8220881ef0b7d2a9082",
+      "sizeBytes": 1012781,
+      "version": "0.1.1"
+    },
+    "website-favorites": {
+      "id": "local.souldesk.website-favorites",
+      "sha256": "99a08c7ee910bc6d8ff3b6a1f5cee930182507b7b0d219af5f887ab5e9fb8851",
+      "sizeBytes": 34465,
+      "version": "0.1.6"
+    }
+  }
+}
