@@ -220,7 +220,9 @@ def build(slug, sdk):
     # 固定元数据和顺序，轻量组件跨操作系统产生逐字节相同的 ZIP。
     with ZipFile(target, "w") as archive:
         for name, data in sorted(files.items()):
-            archive.writestr(ZipInfo(name, date_time=(2020, 1, 1, 0, 0, 0)), data)
+            entry = ZipInfo(name, date_time=(2020, 1, 1, 0, 0, 0))
+            entry.create_system = 3
+            archive.writestr(entry, data)
     data = target.getvalue()
     inspect_zip(data)
     return manifest, data
