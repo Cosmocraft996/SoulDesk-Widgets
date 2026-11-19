@@ -2,7 +2,7 @@
   "id": "local.souldesk.widgetjs.coin-small",
   "name": "虚拟币 · 指数",
   "summary": "查看虚拟货币行情，每分钟刷新一次",
-  "category": "桌面组件",
+  "category": "行情与警报",
   "screenshots": [],
   "versions": [
     {

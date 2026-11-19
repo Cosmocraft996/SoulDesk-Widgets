@@ -23,12 +23,17 @@
       </div>
       <p class="import-tip">下载 ZIP 后，在 SoulDesk 的组件管理窗口选择<strong>导入本地 ZIP</strong>。</p>
     </section>
-    <section aria-labelledby="widgets-title">
-      <div class="section-head">
-        <h2 id="widgets-title">全部组件</h2>
-        <p id="catalog-status" role="status">正在读取目录…</p>
+    <section aria-label="组件列表">
+      <div class="filters" id="filters" hidden>
+        <input id="widget-search" type="search" aria-label="搜索组件" placeholder="搜索组件">
+        <div class="category-list" id="categories" role="group" aria-label="组件分类"></div>
       </div>
+      <p id="catalog-status" role="status">正在读取目录…</p>
       <div class="cards" id="widgets"></div>
+      <div class="no-results" id="no-results" hidden>
+        <p>没有符合条件的组件</p>
+        <button id="clear-filters" type="button">清除筛选</button>
+      </div>
       <noscript><p>启用脚本后可以浏览组件，也可以直接读取下方的组件目录。</p></noscript>
     </section>
   </main>

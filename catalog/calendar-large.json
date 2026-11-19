@@ -2,7 +2,7 @@
   "id": "local.souldesk.widgetjs.calendar-large",
   "name": "大号日历",
   "summary": "大尺寸日历，方便用户对整月日程进行安排",
-  "category": "桌面组件",
+  "category": "日历",
   "screenshots": [],
   "versions": [
     {

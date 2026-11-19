@@ -2,7 +2,7 @@
   "id": "local.souldesk.widgetjs.countdown",
   "name": "倒计时",
   "summary": "日历样式的倒计时组件",
-  "category": "桌面组件",
+  "category": "时间",
   "screenshots": [],
   "versions": [
     {

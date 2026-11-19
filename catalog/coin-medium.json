@@ -2,7 +2,7 @@
   "id": "local.souldesk.widgetjs.coin-medium",
   "name": "主流虚拟币",
   "summary": "实时查看主流虚拟币行情",
-  "category": "桌面组件",
+  "category": "行情与警报",
   "screenshots": [],
   "versions": [
     {

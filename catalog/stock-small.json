@@ -2,7 +2,7 @@
   "id": "local.souldesk.widgetjs.stock-small",
   "name": "股票 · 分时",
   "summary": "跟踪股票价格，每分钟刷新一次",
-  "category": "桌面组件",
+  "category": "行情与警报",
   "screenshots": [],
   "versions": [
     {

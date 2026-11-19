@@ -2,7 +2,7 @@
   "id": "local.souldesk.widgetjs.flip-clock",
   "name": "翻页时钟",
   "summary": "带有翻页动画的数字时钟",
-  "category": "桌面组件",
+  "category": "时间",
   "screenshots": [],
   "versions": [
     {

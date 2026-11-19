@@ -4,6 +4,8 @@
 
 [官方组件广场](https://cosmocraft996.github.io/SoulDesk-Widgets/) · [组件目录](https://cosmocraft996.github.io/SoulDesk-Widgets/catalog.json)
 
+广场支持组合使用用途分类和关键词搜索。分类维护在 `catalog/<组件>.json` 的 `category` 字段，修改已收录组件的分类时提高目录修订号。
+
 | 组件 | 权限 | 用途 |
 | --- | --- | --- |
 | [桌面便签](widgets/daily-note/README.md) | `storage.instance` | 在当前实例保存便签文字 |

@@ -2,7 +2,7 @@
   "id": "local.souldesk.widgetjs.weather-large",
   "name": "天气 · 大号",
   "summary": "显示最近3天气情况",
-  "category": "桌面组件",
+  "category": "天气",
   "screenshots": [],
   "versions": [
     {

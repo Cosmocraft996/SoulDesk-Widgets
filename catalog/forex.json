@@ -2,7 +2,7 @@
   "id": "local.souldesk.widgetjs.forex",
   "name": "汇率换算",
   "summary": "每分钟刷新一次",
-  "category": "桌面组件",
+  "category": "行情与警报",
   "screenshots": [],
   "versions": [
     {

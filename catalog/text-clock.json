@@ -2,7 +2,7 @@
   "id": "local.souldesk.widgetjs.text-clock",
   "name": "文本时钟",
   "summary": "简单的文本时钟",
-  "category": "桌面组件",
+  "category": "时间",
   "screenshots": [],
   "versions": [
     {

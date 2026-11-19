@@ -2,7 +2,7 @@
   "id": "local.souldesk.widgetjs.server",
   "name": "服务器监控",
   "summary": "实时监控多个云服务器状态",
-  "category": "桌面组件",
+  "category": "桌面工具",
   "screenshots": [],
   "versions": [
     {
