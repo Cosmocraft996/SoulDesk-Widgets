@@ -49,8 +49,12 @@
     <form id="form">
       <h2 id="editor-title">添加网站</h2>
       <label>网址<input id="address" type="text" inputmode="url" autocomplete="off" spellcheck="false" required maxlength="4096" placeholder="example.com 或 192.168.1.10:8080" autofocus></label>
-      <label>名称<input id="name" type="text" autocomplete="off" maxlength="64" placeholder="留空显示域名"></label>
+      <label>名称<input id="name" type="text" autocomplete="off" maxlength="64" placeholder="自动获取，也可手填"></label>
       <p id="editor-status" class="error" role="status"></p>
+      <div id="browser-actions" class="dialog-buttons" hidden>
+        <button id="verify" type="button">在验证窗口打开</button>
+        <button id="open-browser" type="button">默认浏览器</button>
+      </div>
       <div class="dialog-buttons">
         <button id="cancel" type="button">取消</button>
         <button class="primary" type="submit">保存</button>

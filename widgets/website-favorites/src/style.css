@@ -262,6 +262,7 @@ dialog input::placeholder { color: var(--muted); }
 dialog p { overflow-wrap: anywhere; }
 .error { color: var(--error); margin-top: 4px; font-size: 11px; }
 .error:empty { display: none; }
+.error[data-lookup] { color: var(--muted); }
 .dialog-buttons { display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px; }
 .dialog-buttons button { padding: 3px 10px; border: 1px solid var(--line); border-radius: 6px; background: #172b3e; }
 .dialog-buttons .primary { background: var(--selected); color: var(--accent); font-weight: 650; }

@@ -46,19 +46,42 @@ function readSites(storage) {
   return storage.sites;
 }
 
-function addFavicon(icon, url) {
-  const address = new URL(url);
-  const domain = address.hostname.replace(/\.$/, '');
-  if (address.protocol !== 'https:' || address.port || isIpAddress(domain) || !domain.includes('.')
-    || /\.(local|internal|localhost)$/.test(domain)) return;
+function addFavicon(icon, site) {
+  let source = site.icon;
+  if (typeof source !== 'string' || source.length > 6000 || !source.startsWith('data:image/png;base64,')) {
+    const address = new URL(site.url);
+    const domain = address.hostname.replace(/\.$/, '');
+    if (Object.hasOwn(site, 'icon') || address.protocol !== 'https:' || address.port
+      || isIpAddress(domain) || !domain.includes('.') || /\.(local|internal|localhost)$/.test(domain)) return;
+    source = new URL('/favicon.ico', site.url).href;
+  }
   const image = document.createElement('img');
   image.alt = '';
   image.loading = 'lazy';
   image.referrerPolicy = 'no-referrer';
   image.addEventListener('error', () => image.remove(), { once: true });
   image.addEventListener('load', () => { icon.dataset.loaded = ''; }, { once: true });
-  image.src = new URL('/favicon.ico', url).href;
+  image.src = source;
   icon.append(image);
+}
+
+async function compactIcon(source) {
+  if (typeof source !== 'string' || !source.startsWith('data:image/')) return null;
+  const image = new Image();
+  image.src = source;
+  try {
+    await image.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 32;
+    const ratio = 32 / Math.max(image.naturalWidth, image.naturalHeight);
+    const width = image.naturalWidth * ratio;
+    const height = image.naturalHeight * ratio;
+    canvas.getContext('2d').drawImage(image, (32 - width) / 2, (32 - height) / 2, width, height);
+    const icon = canvas.toDataURL('image/png');
+    return icon.length <= 6000 ? icon : null;
+  } catch {
+    return null;
+  }
 }
 
 const byId = id => document.getElementById(id);
@@ -79,6 +102,8 @@ const form = byId('form');
 const address = byId('address');
 const nameField = byId('name');
 const editorStatus = byId('editor-status');
+const browserActions = byId('browser-actions');
+const verifyButton = byId('verify');
 const confirmation = byId('confirmation');
 const deleteStatus = byId('delete-status');
 
@@ -88,7 +113,14 @@ function start(host, storage) {
   let saving = false;
   let menuTile;
   let selectedId;
+  let editingSite;
   let newId;
+  let lookupTimer;
+  let lookup;
+  let verification;
+  let verificationTimer;
+  const verificationDraft = 'souldesk.website-favorites.verify.' + host.instanceId;
+  let nameEdited;
   let drag;
   let ignorePointerClick = false;
   let iconsEnabled = false;
@@ -110,7 +142,7 @@ function start(host, storage) {
       tile.querySelector('.site-domain').textContent = label === siteHost ? '' : siteHost;
       tile.querySelector('.monogram').textContent = Array.from(label)[0].toUpperCase();
       tile.querySelector('.site-more').setAttribute('aria-label', `${label}的收藏操作`);
-      if (iconsEnabled) addFavicon(tile.querySelector('.site-icon'), site.url);
+      if (iconsEnabled) addFavicon(tile.querySelector('.site-icon'), site);
       return tile;
     });
     grid.replaceChildren(...tiles);
@@ -194,18 +226,148 @@ function start(host, storage) {
     actions.querySelector('button:not(:disabled)').focus({ preventScroll: true });
   }
 
-  function showEditor(site) {
+  function showEditor(site, read = true) {
     if (saving) return;
     endDrag();
     hideActions(true);
     selectedId = site?.id;
+    editingSite = site;
     newId = site ? undefined : crypto.randomUUID();
+    nameEdited = Boolean(site?.name);
+    clearLookup();
     byId('editor-title').textContent = site ? '编辑网站' : '添加网站';
     address.value = site?.url ?? '';
     nameField.value = site?.name ?? '';
     editorStatus.textContent = '';
     status.textContent = '';
     editor.showModal();
+    if (site && read) void readMetadata(new URL(site.url));
+  }
+
+  function clearLookup() {
+    clearTimeout(lookupTimer);
+    lookup = undefined;
+    browserActions.hidden = true;
+    if (editorStatus.hasAttribute('data-lookup')) {
+      editorStatus.removeAttribute('data-lookup');
+      editorStatus.textContent = '';
+    }
+  }
+
+  function readMetadata(url) {
+    clearTimeout(lookupTimer);
+    if (host.preview || !editor.open || verification
+      || (editingSite?.url === url.href && editingSite.name && editingSite.icon)) return;
+    if (lookup?.url === url.href) return lookup.promise;
+    const request = { url: url.href };
+    lookup = request;
+    editorStatus.dataset.lookup = '';
+    editorStatus.textContent = '正在读取网站信息…';
+    request.promise = (async () => {
+      let feedback = '暂未读到网站信息，可手动填写名称并保存。';
+      try {
+        const result = await host.request('links.metadata', { url: url.href }).catch(() => null);
+        const title = typeof result?.title === 'string' ? result.title.trim() : '';
+        if (lookup === request && editor.open && !nameEdited) nameField.value = title;
+        const icon = await compactIcon(result?.icon);
+        if (result?.status === 'verification') feedback = '网站要求浏览器验证。';
+        else if (title) feedback = icon ? '' : '暂未读到图标，可使用占位图标保存。';
+        else if (icon) feedback = '暂未读到标题，可使用域名或手动填写。';
+        return { title, icon };
+      } catch {
+        return null;
+      } finally {
+        if (lookup === request && editorStatus.hasAttribute('data-lookup')) {
+          editorStatus.textContent = feedback;
+          browserActions.hidden = !feedback;
+          if (!feedback) editorStatus.removeAttribute('data-lookup');
+        }
+      }
+    })();
+    return request.promise;
+  }
+
+  function rememberVerification() {
+    if (!verification) return;
+    try {
+      window.sessionStorage.setItem(verificationDraft, JSON.stringify({
+        ...verification, selectedId, newId, name: nameField.value, nameEdited,
+      }));
+    } catch {
+      // 当前界面仍可继续读取结果。
+    }
+  }
+
+  function stopVerification() {
+    if (!verification) return;
+    const { id } = verification;
+    verification = undefined;
+    clearTimeout(verificationTimer);
+    verifyButton.disabled = false;
+    try { window.sessionStorage.removeItem(verificationDraft); } catch {}
+    void host.request('links.verify.close', { id }).catch(() => {});
+  }
+
+  async function pollVerification(job) {
+    const result = await host.request('links.verify.status', { id: job.id }).catch(() => null);
+    if (verification !== job || !editor.open || saving) return;
+    if (result?.state === 'pending') {
+      verificationTimer = setTimeout(() => void pollVerification(job), 750);
+      return;
+    }
+    const icon = await compactIcon(result?.icon);
+    if (verification !== job || !editor.open || saving) return;
+    stopVerification();
+    if (result?.state === 'ready') {
+      const title = typeof result.title === 'string' ? result.title.trim() : '';
+      if (!nameEdited && title) nameField.value = title;
+      lookup = { url: job.url, promise: Promise.resolve({ title, icon }) };
+      editorStatus.textContent = icon ? '已读取网站信息，可以保存。' : '已读取网页，可使用占位图标保存。';
+      browserActions.hidden = true;
+      return;
+    }
+    editorStatus.textContent = '验证窗口已结束，可以重试或手动保存。';
+  }
+
+  async function openVerification() {
+    const url = parseAddress(address.value);
+    if (host.preview || verification || !url || saving) return;
+    const job = { id: crypto.randomUUID(), url: url.href };
+    clearLookup();
+    verification = job;
+    rememberVerification();
+    browserActions.hidden = false;
+    verifyButton.disabled = true;
+    editorStatus.dataset.lookup = '';
+    editorStatus.textContent = '在验证窗口完成验证后，点击窗口菜单「完成验证并读取网站信息」。';
+    try {
+      await host.request('links.verify.start', job);
+      if (verification === job) void pollVerification(job);
+      else void host.request('links.verify.close', { id: job.id }).catch(() => {});
+    } catch {
+      if (verification !== job) return;
+      stopVerification();
+      editorStatus.textContent = '验证窗口未打开，可以使用默认浏览器或手动保存。';
+    }
+  }
+
+  function restoreVerification() {
+    let draft;
+    try { draft = JSON.parse(window.sessionStorage.getItem(verificationDraft)); } catch { return; }
+    const url = typeof draft?.url === 'string' ? parseAddress(draft.url) : null;
+    const site = sites.find(item => item.id === draft?.selectedId);
+    if (!url || typeof draft.id !== 'string' || (draft.selectedId && !site)) return;
+    showEditor(site, false);
+    newId = draft.newId ?? newId;
+    address.value = url.href;
+    nameField.value = typeof draft.name === 'string' ? draft.name : '';
+    nameEdited = draft.nameEdited === true;
+    verification = { id: draft.id, url: url.href };
+    verifyButton.disabled = true;
+    browserActions.hidden = false;
+    editorStatus.dataset.lookup = '';
+    editorStatus.textContent = '正在等待验证窗口返回网站信息…';
+    void pollVerification(verification);
   }
 
   async function moveToEdge(destination) {
@@ -241,6 +403,29 @@ function start(host, storage) {
   });
   byId('cancel').addEventListener('click', () => editor.close());
   byId('keep').addEventListener('click', () => confirmation.close());
+  editor.addEventListener('close', () => {
+    if (editor.open) return;
+    stopVerification();
+    clearLookup();
+  });
+  verifyButton.addEventListener('click', () => void openVerification());
+  byId('open-browser').addEventListener('click', () => {
+    const url = parseAddress(address.value);
+    if (url) void openSite({ url: url.href });
+  });
+  nameField.addEventListener('input', () => {
+    nameEdited = true;
+    rememberVerification();
+  });
+  address.addEventListener('input', () => {
+    const url = parseAddress(address.value);
+    const request = verification ?? lookup;
+    if (request && request.url === url?.href) return;
+    stopVerification();
+    clearLookup();
+    if (!nameEdited) nameField.value = '';
+    if (url && !host.preview) lookupTimer = setTimeout(() => void readMetadata(url), 450);
+  });
   for (const dialog of [editor, confirmation]) {
     dialog.addEventListener('cancel', event => { if (saving) event.preventDefault(); });
     dialog.addEventListener('close', () => {
@@ -248,7 +433,7 @@ function start(host, storage) {
       if (dialog.contains(document.activeElement) || document.activeElement === document.body) focusTile(selectedId);
     });
   }
-  form.addEventListener('submit', event => {
+  form.addEventListener('submit', async event => {
     event.preventDefault();
     if (saving) return;
     const url = parseAddress(address.value);
@@ -257,8 +442,16 @@ function start(host, storage) {
       address.focus();
       return;
     }
-    const site = { id: selectedId ?? newId, name: nameField.value.trim(), url: url.href };
+    const id = selectedId ?? newId;
+    const promise = readMetadata(url);
+    const metadata = promise ? await promise : null;
+    if (saving || !editor.open || id !== (selectedId ?? newId) || parseAddress(address.value)?.href !== url.href) return;
+    const site = { id, name: nameField.value.trim() || (!nameEdited && metadata?.title) || '', url: url.href };
+    const savedIcon = metadata?.icon ?? (editingSite?.url === site.url ? editingSite.icon : null);
+    if (savedIcon !== undefined) site.icon = savedIcon;
     const next = selectedId ? sites.map(item => item.id === selectedId ? site : item) : [site, ...sites];
+    stopVerification();
+    editorStatus.removeAttribute('data-lookup');
     void persist(next, { dialog: editor, feedback: editorStatus, focusId: site.id });
   });
   byId('confirm-remove').addEventListener('click', () => {
@@ -446,7 +639,8 @@ function start(host, storage) {
     for (const button of toolbarButtons) button.disabled = false;
     if (host.preview) return;
     iconsEnabled = true;
-    Array.from(grid.children).forEach((tile, index) => addFavicon(tile.querySelector('.site-icon'), sites[index].url));
+    Array.from(grid.children).forEach((tile, index) => addFavicon(tile.querySelector('.site-icon'), sites[index]));
+    restoreVerification();
   };
 }
 

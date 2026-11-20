@@ -2,29 +2,27 @@
   "schemaVersion": 1,
   "id": "local.souldesk.widgetjs.forex",
   "name": "汇率换算",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "hostApiMajor": 1,
   "loadCheck": 1,
   "entry": "dist/index.html",
   "defaultSize": {
-    "width": 340,
-    "height": 300
+    "width": 320,
+    "height": 188
   },
   "minSize": {
-    "width": 260,
-    "height": 240
+    "width": 240,
+    "height": 184
   },
   "capabilities": [
     "storage.instance",
-    "content.source.forex",
-    "images.https"
+    "content.source.forex"
   ],
   "settingsSchema": {
     "type": "object",
     "additionalProperties": false,
     "required": [
-      "from",
-      "to",
+      "currencies",
       "background",
       "foreground",
       "radius"
@@ -32,15 +30,19 @@
     "properties": {
       "from": {
         "type": "string",
-        "title": "来源币种",
-        "maxLength": 3,
-        "default": "USD"
+        "title": "旧版来源币种",
+        "maxLength": 3
       },
       "to": {
         "type": "string",
-        "title": "目标币种",
-        "maxLength": 3,
-        "default": "CNY"
+        "title": "旧版目标币种",
+        "maxLength": 3
+      },
+      "currencies": {
+        "type": "string",
+        "title": "币种列表",
+        "maxLength": 8192,
+        "default": ""
       },
       "background": {
         "type": "string",

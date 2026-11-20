@@ -9,33 +9,68 @@
 <body>
   <main aria-label="Prompt 收藏夹">
     <header>
-      <input id="search" type="search" aria-label="搜索提示词" placeholder="搜索提示词" disabled>
-      <button id="add" type="button" aria-label="新增收藏" title="新增收藏" disabled></button>
+      <div class="title-row">
+        <h1>Prompt 收藏夹</h1>
+        <button id="toggle-all" type="button" disabled>全部折叠</button>
+      </div>
+      <div class="search-row">
+        <input id="search" type="search" aria-label="搜索提示词" placeholder="搜索提示词" disabled>
+        <button id="add-category" type="button" disabled>新建分类</button>
+        <button id="add" type="button" aria-label="新增收藏" title="新增收藏" disabled></button>
+      </div>
     </header>
     <section class="collection" aria-label="收藏列表">
       <p id="empty">正在加载…</p>
-      <ul id="list"></ul>
+      <ul id="list" aria-label="收藏分类"></ul>
     </section>
     <p id="status" class="status" role="status" aria-live="polite"></p>
   </main>
 
+  <template id="group-template">
+    <li class="group">
+      <div class="group-bar">
+        <button class="group-toggle" type="button" aria-expanded="true">
+          <span class="group-name"></span><span class="group-count"></span>
+        </button>
+        <span class="group-handle" title="拖动分类排序" aria-hidden="true">⠿</span>
+        <button class="group-menu" type="button">⋯</button>
+      </div>
+      <ul class="prompts"></ul>
+    </li>
+  </template>
   <div id="preview" class="overlay" aria-hidden="true" hidden></div>
   <div id="actions" class="overlay" role="group" aria-label="收藏操作" hidden>
     <button id="edit" type="button">编辑</button>
     <button id="move-top" type="button">移到顶部</button>
     <button id="move-bottom" type="button">移到底部</button>
+    <details id="move-group">
+      <summary>移动到分组</summary>
+      <div id="move-destinations"></div>
+    </details>
     <button id="menu-delete" class="danger" type="button">删除</button>
   </div>
 
   <dialog id="editor" aria-labelledby="editor-title">
     <form id="form">
       <h2 id="editor-title"></h2>
+      <label>分类<select id="category"></select></label>
       <label>提示词<textarea id="body" rows="5" spellcheck="false" required></textarea></label>
       <p id="editor-status" class="status" role="status"></p>
       <footer>
         <button id="ask-delete" class="danger" type="button">删除</button>
         <button id="cancel" type="button">取消</button>
         <button id="save" class="primary" type="submit">保存</button>
+      </footer>
+    </form>
+  </dialog>
+  <dialog id="category-editor" aria-labelledby="category-editor-title">
+    <form id="category-form">
+      <h2 id="category-editor-title"></h2>
+      <label>分类名称<input id="category-name" type="text" required></label>
+      <p id="category-status" class="status" role="status"></p>
+      <footer>
+        <button id="cancel-category" type="button">取消</button>
+        <button class="primary" type="submit">保存</button>
       </footer>
     </form>
   </dialog>

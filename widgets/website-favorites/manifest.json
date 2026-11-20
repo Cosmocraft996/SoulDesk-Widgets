@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "local.souldesk.website-favorites",
   "name": "网站收藏夹",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "hostApiMajor": 1,
   "loadCheck": 1,
   "entry": "dist/index.html",
@@ -17,6 +17,8 @@
   "capabilities": [
     "storage.instance",
     "links.openWeb",
+    "links.metadata",
+    "links.verify",
     "images.https"
   ],
   "settingsSchema": {
