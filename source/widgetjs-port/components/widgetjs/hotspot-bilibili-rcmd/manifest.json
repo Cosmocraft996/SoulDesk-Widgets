@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "id": "local.souldesk.widgetjs.hotspot-bilibili-rcmd",
   "name": "B站推荐",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "hostApiMajor": 1,
   "loadCheck": 1,
   "entry": "dist/index.html",
   "defaultSize": {
-    "width": 360,
-    "height": 420
+    "width": 300,
+    "height": 320
   },
   "minSize": {
     "width": 260,

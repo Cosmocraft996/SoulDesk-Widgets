@@ -1,12 +1,8 @@
 <script lang="ts" setup>
-import { ScrollArea } from '@/native';
-
-import { contentFailure } from '@/native';
-
+import { contentFailure } from '@/native'
 import client from '@/client'
 import { ref } from 'vue'
 import dayjs from 'dayjs'
-import { useComponentSize } from '@/native'
 import { useIntervalFn } from '@vueuse/core'
 import BangumiItem from '@/widgets/bangumi/BangumiItem.vue'
 import type { BangumiResult, BangumiResultItem } from '@/widgets/bangumi/model/BangumiResult'
@@ -35,8 +31,6 @@ try {
 
 refresh()
 
-const { width, height } = useComponentSize()
-
 function weekdayClick(item: BangumiResultItem) {
   activeItem.value = item
 }
@@ -49,11 +43,13 @@ useIntervalFn(() => {
 <template>
   <div class="bangumi-widget">
     <div class="weekdays">
-      <div
+      <button
         v-for="item in items"
         :key="item.date_ts"
+        type="button"
         class="weekday"
         :class="{ 'is-today': item.is_today, 'active': item == activeItem }"
+        :aria-pressed="item == activeItem"
         @click="weekdayClick(item)"
       >
         <div class="day-of-month">
@@ -62,54 +58,48 @@ useIntervalFn(() => {
         <div class="weekday-name">
           {{ item.weekday }}
         </div>
-      </div>
+      </button>
     </div>
-    <ScrollArea :height="height - 78" wrap-style="padding:12px 0;">
-      <div class="bangumis" :style="{ width: `${width}px` }">
+    <div class="scroll-area">
+      <div class="bangumis">
         <BangumiItem v-for="item in activeItem?.seasons" :key="item.ep_id" :item="item" />
       </div>
-    </ScrollArea>
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-@use "sass:color";
-$bilibili-color: #00aeec;
-$bilibili-red: #fb7299;
-$text-color: color.adjust($bilibili-color, $lightness: -35%);
-$card-bg: color.adjust($bilibili-color, $lightness: 50%);
 .bangumi-widget {
   display: flex;
+  height: 100%;
   flex-direction: column;
-  align-items: center;
   border-radius: var(--widget-border-radius);
   overflow: hidden;
 
   .weekdays {
     display: flex;
-    gap: 8px;
-    width: 100%;
-    place-items: center;
-    place-content: center;
-    border-radius: var(--widget-border-raidus);
-    overflow: hidden;
-
+    flex: none;
+    gap: 4px;
     background: #2cbae5;
-    padding: 8px;
+    padding: 5px 32px 5px 6px;
 
     .weekday {
-      padding: 8px 8px;
+      flex: 1;
+      min-width: 0;
+      padding: 2px 0 3px;
+      border: 0;
+      border-top: 2px solid transparent;
       display: flex;
       flex-direction: column;
       justify-content: center;
       place-items: center;
       border-radius: 0.2rem;
-      font-size: 0.8rem;
+      font-size: 12px;
       background-color: rgba(255, 255, 255, 0.4);
       backdrop-filter: blur(10px);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
       cursor: pointer;
-      gap: 4px;
+      gap: 1px;
       transition: all 0.2s ease-in-out;
 
       &:hover,
@@ -127,21 +117,26 @@ $card-bg: color.adjust($bilibili-color, $lightness: 50%);
       }
 
       .weekday-name {
-        font-size: 12px;
+        font-size: 10px;
         color: #636262;
       }
 
       &.is-today {
-        border-top: 4px solid #eebe01;
+        border-top-color: #eebe01;
       }
     }
+  }
+
+  .scroll-area {
+    min-height: 0;
+    overflow: auto;
   }
 
   .bangumis {
     display: flex;
     flex-direction: column;
-    padding: 0 16px;
-    gap: 1rem;
+    padding: 6px;
+    gap: 4px;
   }
 }
 </style>
