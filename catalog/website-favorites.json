@@ -6,6 +6,22 @@
   "screenshots": [],
   "versions": [
     {
+      "version": "0.2.0",
+      "capabilities": [
+        "storage.instance",
+        "links.openWeb",
+        "links.metadata",
+        "links.verify",
+        "images.https"
+      ],
+      "sizeBytes": 42757,
+      "sha256": "e6708d2789d2a7b5bbc502b33941f3c19d298c2cbdeac785eb1e7825ba2b0c33",
+      "minHostVersion": "0.5.6",
+      "releaseNotes": "移除按域名预置的名称和图标。所有网站统一尝试后台读取，遇到浏览器验证或信息缺失时，可手动打开临时窗口并获取当前网页信息。需要配套升级宿主。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-website-favorites-v0.2.0/local.souldesk.website-favorites-0.2.0.zip"
+    },
+    {
       "version": "0.1.6",
       "sizeBytes": 34465,
       "sha256": "99a08c7ee910bc6d8ff3b6a1f5cee930182507b7b0d219af5f887ab5e9fb8851",
