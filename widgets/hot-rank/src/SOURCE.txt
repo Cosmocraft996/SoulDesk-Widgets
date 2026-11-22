@@ -1,0 +1,4 @@
+榜单源码与资产来源：https://github.com/widget-js/hotspot
+固定提交：cff331e104d8f991e5cd7aa1be164d0fb8c93cc9
+复用广场内 WidgetJS 移植源码的五个榜单视图、请求适配和样式。
+根许可证为 GPL v2，包清单另标 MIT。附带根许可证；本包供本地导入验证。

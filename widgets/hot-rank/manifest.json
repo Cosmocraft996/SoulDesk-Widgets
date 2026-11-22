@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "official.souldesk.hot-rank",
+  "name": "热榜",
+  "version": "0.1.2",
+  "hostApiMajor": 1,
+  "loadCheck": 1,
+  "entry": "dist/index.html",
+  "defaultSize": { "width": 360, "height": 450 },
+  "minSize": { "width": 260, "height": 250 },
+  "capabilities": [
+    "storage.instance",
+    "content.source.bilibili",
+    "content.source.douyin",
+    "content.source.tou-tiao",
+    "content.source.weibo",
+    "content.source.zhihu",
+    "images.https",
+    "links.open"
+  ],
+  "settingsSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["background", "foreground", "radius", "refreshMinutes"],
+    "properties": {
+      "background": { "type": "string", "title": "背景颜色", "maxLength": 7, "default": "#faf7f2" },
+      "foreground": { "type": "string", "title": "文字颜色", "maxLength": 7, "default": "#494644" },
+      "radius": { "type": "integer", "title": "圆角", "minimum": 0, "maximum": 40, "default": 16 },
+      "refreshMinutes": { "type": "integer", "title": "刷新间隔（分钟）", "minimum": 1, "maximum": 1440, "default": 20 }
+    }
+  }
+}
