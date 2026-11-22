@@ -4,5 +4,25 @@
   "summary": "切换查看 B 站、抖音、头条、微博和知乎热榜，按实例记住选择。",
   "category": "热点资讯",
   "screenshots": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "0.1.2",
+      "capabilities": [
+        "storage.instance",
+        "content.source.bilibili",
+        "content.source.douyin",
+        "content.source.tou-tiao",
+        "content.source.weibo",
+        "content.source.zhihu",
+        "images.https",
+        "links.open"
+      ],
+      "sizeBytes": 151894,
+      "sha256": "3a7b1a6a0c3f18c8d0aa32bf188b11d8e8db257d12e3285112de1eaf781c9487",
+      "minHostVersion": "0.5.6",
+      "releaseNotes": "- 五个来源共用当前实例的自动刷新间隔，默认 20 分钟，可设置为 1 至 1440 分钟。\n- 打开组件或切换来源时仍立即请求当前榜单。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-hot-rank-v0.1.2/official.souldesk.hot-rank-0.1.2.zip"
+    }
+  ]
 }
