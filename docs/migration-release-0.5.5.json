@@ -164,12 +164,6 @@
       "sizeBytes": 217637,
       "version": "0.1.5"
     },
-    "hotspot-bilibili": {
-      "id": "local.souldesk.widgetjs.hotspot-bilibili",
-      "sha256": "1a7c59f5ceb8b2cbc8ac80819e4df1f64551aef7e01cbb817fcb70850ce8058e",
-      "sizeBytes": 217631,
-      "version": "0.1.5"
-    },
     "hotspot-bilibili-rcmd": {
       "id": "local.souldesk.widgetjs.hotspot-bilibili-rcmd",
       "sha256": "e49e416b669e3052898b626986e0d2ab89c502c717f2996275ca41d113436e33",
@@ -180,30 +174,6 @@
       "id": "local.souldesk.widgetjs.hotspot-cls-telegraph",
       "sha256": "3771969f5ddcc17c0c09f519d60edc7effe4ccb518b6ceaadebc35a6af1d1b40",
       "sizeBytes": 217633,
-      "version": "0.1.5"
-    },
-    "hotspot-douyin": {
-      "id": "local.souldesk.widgetjs.hotspot-douyin",
-      "sha256": "1fa04141414178af8fe7db5d1eeedbe0c2096f513d49fcc23c44400a2f2d79a0",
-      "sizeBytes": 217599,
-      "version": "0.1.5"
-    },
-    "hotspot-tou-tiao": {
-      "id": "local.souldesk.widgetjs.hotspot-tou-tiao",
-      "sha256": "b3740004835e1eab9d26bbf3c2a433fa900c19add8a2f37b1c2eb35d923c57ae",
-      "sizeBytes": 217627,
-      "version": "0.1.5"
-    },
-    "hotspot-weibo": {
-      "id": "local.souldesk.widgetjs.hotspot-weibo",
-      "sha256": "586269323a307be7b08ea44342d85f2233aa67474ec74b5f94d260f473ccc096",
-      "sizeBytes": 217596,
-      "version": "0.1.5"
-    },
-    "hotspot-zhihu": {
-      "id": "local.souldesk.widgetjs.hotspot-zhihu",
-      "sha256": "6c4c2dca73c67fa602db7d19a08d65ea25b0f13cf55c0a094a223001e9a710b8",
-      "sizeBytes": 217583,
       "version": "0.1.5"
     },
     "key-stroke": {

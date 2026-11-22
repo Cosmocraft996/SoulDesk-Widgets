@@ -147,7 +147,7 @@
     ],
     [
       "components/widgetjs/forex",
-      "b78de4f66cc9d25cce93230904c7746073c2be1152ca19715876a4353dc319db"
+      "9d456aa475697f370b57ae9d6183d5a20085e7d01f2920d8f5e1616fff5c265a"
     ],
     [
       "components/widgetjs/glitch-clock",
@@ -170,12 +170,12 @@
       "f9b00364cf73fee696c20e986e0ad5b2997fce4083d1657e2ddfb6c4752dd8e9"
     ],
     [
-      "components/widgetjs/hotspot-bangumi",
-      "d04a343318b17f0b2237f22ceed8e3f4c525dde45e64c0ffcf943a51fa2e36c0"
+      "components/widgetjs/hot-rank-source",
+      "17dd6a44985cfbd6f1de4ad70985c635508850ff2d13c6c9f15ed0b2b5552eba"
     ],
     [
-      "components/widgetjs/hotspot-bilibili",
-      "41c1103c6f97d004fdbbe189cd04c7f69f17755861ef90edafab81f385153b7d"
+      "components/widgetjs/hotspot-bangumi",
+      "d04a343318b17f0b2237f22ceed8e3f4c525dde45e64c0ffcf943a51fa2e36c0"
     ],
     [
       "components/widgetjs/hotspot-bilibili-rcmd",
@@ -186,24 +186,8 @@
       "11973b11c50af396dd1e10fb5726d92dba5d3c2fe8134fcab43976c99ea3c58c"
     ],
     [
-      "components/widgetjs/hotspot-douyin",
-      "cc19f76910d7f6c837773e903c3db79213f25007ed7bd3bafc12d3d25a1df69f"
-    ],
-    [
       "components/widgetjs/hotspot-source",
       "6421842c624fbef3f6936ef441eff6bdac7b32b0645f214ae39ab0bb25779a03"
-    ],
-    [
-      "components/widgetjs/hotspot-tou-tiao",
-      "260f99cfda95b009f441e048b91ddd522e24b87abfb5f3181bc33c67ef061e91"
-    ],
-    [
-      "components/widgetjs/hotspot-weibo",
-      "2125787a9525c723f6c06a0bfdc735b6e4b6888772784ee4222367d4d378ef65"
-    ],
-    [
-      "components/widgetjs/hotspot-zhihu",
-      "b1b19d2b10610565c6b0658541c86e03dcfe276cf9084725c722fa56938106ef"
     ],
     [
       "components/widgetjs/job-source",
@@ -359,7 +343,7 @@
     ],
     [
       "package.json",
-      "b67a816fa5c11ae7d66b5675646b925abb023eca8936410a3630a3c481331394"
+      "63d5b6aba7510c072a3da8fb685838ed83eff27cb6fc5fd5758c8beca3e1db42"
     ],
     [
       "pnpm-lock.yaml",
@@ -411,7 +395,7 @@
     ],
     [
       "scripts/widgetjs-hotspots.mjs",
-      "1397bc315665edfdde07bd9579d0d03de1c05eff871d2cc7baebe3bfee9aea90"
+      "fc1d0eb219a06807b791b7ab5aacb7b7c67c761908a3527e6e13fe5de5b8cbee"
     ],
     [
       "sdk/host.d.ts",
@@ -586,12 +570,6 @@
       "files": 7
     },
     {
-      "id": "local.souldesk.widgetjs.hotspot-bilibili",
-      "version": "0.1.4",
-      "digest": "45b9f8b3714b31ff5a670241196950ab523c6a3c1ee239b62a4e902191939ca2",
-      "files": 7
-    },
-    {
       "id": "local.souldesk.widgetjs.hotspot-bilibili-rcmd",
       "version": "0.1.4",
       "digest": "b10b0f5cf0948494853ef17ed3e7ed3416270332382b2f40b0e94216a72b6a10",
@@ -601,30 +579,6 @@
       "id": "local.souldesk.widgetjs.hotspot-cls-telegraph",
       "version": "0.1.4",
       "digest": "325fb129f7508840bcad2b8adf91dbda18c496939759425f1deb87a89472984a",
-      "files": 7
-    },
-    {
-      "id": "local.souldesk.widgetjs.hotspot-douyin",
-      "version": "0.1.4",
-      "digest": "4b6cc73ad81784a6c8c715de941144a3724aa98a901e29b328db38c3781dd7e3",
-      "files": 7
-    },
-    {
-      "id": "local.souldesk.widgetjs.hotspot-tou-tiao",
-      "version": "0.1.4",
-      "digest": "2e094b505c7542294ab8c0bd3a88f06229b6a5e3302c9f2104d9eb392ac2a093",
-      "files": 7
-    },
-    {
-      "id": "local.souldesk.widgetjs.hotspot-weibo",
-      "version": "0.1.4",
-      "digest": "6f119ea7ff2c6453f148f0ce2542c3cffa92100de1a817cbc50fa666820e1b5a",
-      "files": 7
-    },
-    {
-      "id": "local.souldesk.widgetjs.hotspot-zhihu",
-      "version": "0.1.4",
-      "digest": "7b30c57fc78ce74e050f69a643208ca6134090f3b4cbd31bed03dfc2b50c10e1",
       "files": 7
     },
     {

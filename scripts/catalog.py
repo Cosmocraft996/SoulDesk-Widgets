@@ -101,8 +101,10 @@ def check_history(base, revision, widgets):
             continue
         old = json.loads(git("show", f"{base}:{path}"))
         slug = Path(path).stem
-        if old["versions"]:
-            require(slug in widgets and widgets[slug]["id"] == old["id"], f"{slug} 的已收录组件应保留历史")
+        if old["versions"] and slug not in widgets:
+            require(not (WIDGETS / slug).exists(), f"{slug} 仍有组件目录，应撤回版本或完成退役清理")
+        elif old["versions"]:
+            require(widgets[slug]["id"] == old["id"], f"{slug} 的收录 ID 不可更改")
             items = {item["version"]: item for item in widgets[slug]["versions"]}
             for item in old["versions"]:
                 new = items.get(item["version"])

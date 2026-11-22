@@ -43,7 +43,7 @@ python -m http.server 8000 --directory artifacts/preview
    python scripts/catalog.py record daily-note artifacts/widgets/official.souldesk.daily-note-0.1.0.zip --min-host 0.5.2
    ```
 
-5. 合入收录记录后，Pages 工作流重新校验公开包并部署。首次配置时在仓库 Pages 设置选择 GitHub Actions 发布源。部署后打开网页组件详情与 `catalog.json`，从目标网络下载核对。撤回时将记录改为 `withdrawn` 并增加 `catalog/revision.json` 的修订号。
+5. 合入收录记录后，Pages 工作流重新校验公开包并部署。首次配置时在仓库 Pages 设置选择 GitHub Actions 发布源。部署后打开网页组件详情与 `catalog.json`，从目标网络下载核对。撤回时将记录改为 `withdrawn` 并增加 `catalog/revision.json` 的修订号。整款组件退役时，移除组件目录及对应目录项并提高修订号。已发布的 ZIP 仍按原下载地址与摘要保存。
 
 ## 目录签名
 
