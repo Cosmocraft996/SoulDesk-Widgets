@@ -6,6 +6,21 @@
   "screenshots": [],
   "versions": [
     {
+      "version": "0.1.6",
+      "capabilities": [
+        "storage.instance",
+        "content.source.bangumi",
+        "images.https",
+        "links.open"
+      ],
+      "sizeBytes": 219232,
+      "sha256": "df768bef4b7b3fe395267882b82f7c4f0b7476ea344f90d86260d2202e7bc5c7",
+      "minHostVersion": "0.5.5",
+      "releaseNotes": "- 封面请求不发送引用来源，避免被 B 站图床拒绝。取色失败时沿用默认卡片配色。\n- 默认尺寸缩为 300×300，压缩日期栏、封面与条目间距，内容区独立滚动。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-hotspot-bangumi-v0.1.6/local.souldesk.widgetjs.hotspot-bangumi-0.1.6.zip"
+    },
+    {
       "version": "0.1.5",
       "sizeBytes": 217637,
       "sha256": "215ba6aab862181363cc1824a3e82dca22e138ba4c13ffb07c709f68844a6110",

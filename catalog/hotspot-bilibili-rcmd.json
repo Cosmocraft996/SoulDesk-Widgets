@@ -6,6 +6,21 @@
   "screenshots": [],
   "versions": [
     {
+      "version": "0.1.6",
+      "capabilities": [
+        "storage.instance",
+        "content.source.bilibili-rcmd",
+        "images.https",
+        "links.open"
+      ],
+      "sizeBytes": 219238,
+      "sha256": "c9b2132964fe163bcff54093bc1de63decf1c31ee0e3df360fa2f1678a1bd27b",
+      "minHostVersion": "0.5.5",
+      "releaseNotes": "- 封面请求不发送引用来源，避免被 B 站图床拒绝。\n- 默认尺寸缩为 300×320，收紧工具栏、卡片和间距。\n- 工具栏支持切换列表和网格，展示方式按实例保存，默认网格。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-hotspot-bilibili-rcmd-v0.1.6/local.souldesk.widgetjs.hotspot-bilibili-rcmd-0.1.6.zip"
+    },
+    {
       "version": "0.1.5",
       "sizeBytes": 217643,
       "sha256": "e49e416b669e3052898b626986e0d2ab89c502c717f2996275ca41d113436e33",
