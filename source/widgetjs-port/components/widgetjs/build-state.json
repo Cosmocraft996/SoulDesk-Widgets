@@ -147,7 +147,7 @@
     ],
     [
       "components/widgetjs/forex",
-      "9d456aa475697f370b57ae9d6183d5a20085e7d01f2920d8f5e1616fff5c265a"
+      "b78de4f66cc9d25cce93230904c7746073c2be1152ca19715876a4353dc319db"
     ],
     [
       "components/widgetjs/glitch-clock",
@@ -168,10 +168,6 @@
     [
       "components/widgetjs/hardware-common",
       "f9b00364cf73fee696c20e986e0ad5b2997fce4083d1657e2ddfb6c4752dd8e9"
-    ],
-    [
-      "components/widgetjs/hot-rank-source",
-      "17dd6a44985cfbd6f1de4ad70985c635508850ff2d13c6c9f15ed0b2b5552eba"
     ],
     [
       "components/widgetjs/hotspot-bangumi",
@@ -343,7 +339,7 @@
     ],
     [
       "package.json",
-      "63d5b6aba7510c072a3da8fb685838ed83eff27cb6fc5fd5758c8beca3e1db42"
+      "b67a816fa5c11ae7d66b5675646b925abb023eca8936410a3630a3c481331394"
     ],
     [
       "pnpm-lock.yaml",
