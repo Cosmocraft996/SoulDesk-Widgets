@@ -6,6 +6,21 @@
   "screenshots": [],
   "versions": [
     {
+      "version": "0.3.6",
+      "capabilities": [
+        "storage.instance",
+        "market.read",
+        "market.chart",
+        "alerts.manage"
+      ],
+      "sizeBytes": 108878,
+      "sha256": "be785a413c0367eb07318d973994a2fa47cb700b3d6ff72d13dc9a246f37c595",
+      "minHostVersion": "0.5.7",
+      "releaseNotes": "- K 线中新建的重复到价警报默认冷却 5 秒。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-market-v0.3.6/local.souldesk.market-0.3.6.zip"
+    },
+    {
       "version": "0.2.1",
       "sizeBytes": 36553,
       "sha256": "79ffedaffc5fd6d6639893a0199583c8464a0c2f483b8b223f32493785323a58",
