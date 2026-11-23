@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>市场观察</title><link rel="stylesheet" href="style.css"></head>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>市场观察</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="market-ui.css"></head>
 <body><main>
   <header><div><small>BINANCE / USD-M</small><h1 id="title">市场观察</h1></div><span class="connection" id="connection">等待核心</span></header>
   <nav aria-label="业务视图"><button data-tab="quotes" class="active">行情 <span id="count">0/20</span></button><button data-tab="rules">价格警报</button><button data-tab="history">触发历史</button></nav>
@@ -10,13 +10,13 @@
     <p class="hint">报价来自币安 USDT 永续合约，非标的现货。灰色为上次报价；无新成交与连接断开分别显示。</p>
     <p class="hint" id="tradfi-note">TradFi 的标的市场休市不代表永续合约停止交易；合约状态以币安目录为准。</p>
   </section>
-  <section id="rules" hidden><div class="section-head"><h2>后台规则</h2><button id="new-rule">＋ 新建规则</button></div><p class="hint">规则属于核心后台；移除行情组件不会删除规则。通知和声音独立控制。</p><div id="rule-list"></div>
+  <section id="rules" hidden><div class="section-head"><h2>后台规则</h2><button id="new-rule">＋ 新建规则</button></div><p class="hint">规则由宿主后台执行，可在「应用设置 → 通知」统一开关行情铃声。</p><div id="rule-list"></div>
     <dialog id="editor"><form id="rule-form"><div class="section-head"><h2 id="editor-title">新建到价规则</h2><button type="button" id="cancel">关闭</button></div>
       <label>规则名称<input name="name" required maxlength="80" placeholder="如：BTC 到价"></label>
       <div class="fields"><label>合约<select name="symbol" required></select></label><label>价格口径<select name="kind"><option value="last">最新成交价 Last</option><option value="mark">标记价格 Mark</option></select></label></div>
       <div class="fields"><label>方向<select name="direction"><option value="up">达到或高于 ≥</option><option value="down">达到或低于 ≤</option></select></label><label>阈值（USDT）<input name="threshold" required inputmode="decimal" pattern="[0-9]+(\.[0-9]+)?" placeholder="精确十进制"></label></div>
       <div class="fields"><label>模式<select name="mode"><option value="once">单次</option><option value="repeat">可重复</option></select></label><label>冷却秒数<input name="cooldown" type="number" min="0" max="604800" step="1" value="60" required></label></div>
-      <div class="checks"><label><input name="enabled" type="checkbox" checked>启用</label><label><input name="notification" type="checkbox" checked>系统通知</label><label><input name="sound" type="checkbox" checked>独立声音</label></div>
+      <div class="checks"><label><input name="enabled" type="checkbox" checked>启用</label><label><input name="notification" type="checkbox" checked>系统通知</label></div>
       <p id="initial-warning" class="warning"></p><p class="hint">达到包含等号。持续处于同一侧不会周期重复；冷却中回到等待侧再到价，结束后用新鲜报价复核补提醒。</p><p id="editor-error" role="alert"></p><button class="primary" id="save-rule">保存规则</button>
     </form></dialog>
   </section>

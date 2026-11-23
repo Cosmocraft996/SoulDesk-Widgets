@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "id": "local.souldesk.market",
   "name": "币安行情与价格警报",
-  "version": "0.2.1",
+  "version": "0.3.6",
   "hostApiMajor": 1,
   "loadCheck": 1,
   "entry": "dist/index.html",
   "defaultSize": {
     "width": 430,
-    "height": 490
+    "height": 460
   },
   "minSize": {
     "width": 320,
@@ -17,6 +17,7 @@
   "capabilities": [
     "storage.instance",
     "market.read",
+    "market.chart",
     "alerts.manage"
   ],
   "settingsSchema": {
@@ -26,7 +27,10 @@
         "type": "string",
         "maxLength": 60,
         "default": "市场观察"
-      }
+      },
+      "layout": { "type": "string", "maxLength": 4, "default": "list" },
+      "rangeHours": { "type": "integer", "minimum": 1, "maximum": 168, "default": 4 },
+      "maPeriods": { "type": "string", "maxLength": 30, "default": "5,10,30" }
     },
     "additionalProperties": false
   }
