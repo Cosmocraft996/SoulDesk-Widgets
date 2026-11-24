@@ -23,7 +23,7 @@ document.body.innerHTML=`<main class="market-chart"><div class="chart-toolbar"><
   <form id="chart-rule-form" hidden><label>规则名称<input id="alert-name" maxlength="80" autocomplete="off" required></label>
   <div class="chart-fields"><label>触发条件<select id="alert-condition"><option value="reach">到价（自动方向）</option><option value="cross-up">向上穿越</option><option value="cross-down">向下穿越</option></select></label><label>警报价位<input id="alert-threshold" inputmode="decimal" required></label>
   <label>频率<select id="alert-mode"><option value="once">单次</option><option value="repeat">重复</option></select></label>
-  <label>冷却秒数<input id="alert-cooldown" type="number" min="0" max="604800" step="1" required></label></div>
+  <label>冷却秒数<input id="alert-cooldown" type="number" min="0" max="604800" step="1" title="0 秒使用宿主默认冷却时间" required></label></div>
   <label>通知方式<select id="alert-notification"><option value="windows">Windows 通知</option><option value="island">灵动通知</option><option value="none">关闭弹窗</option></select></label>
   <p id="alert-hint" class="market-hint"></p><p id="alert-status" class="market-hint" role="status" hidden></p><p id="alert-error" class="market-message" role="alert" hidden></p>
   <div class="tool-row"><button id="alert-cancel" type="button">取消</button></div>

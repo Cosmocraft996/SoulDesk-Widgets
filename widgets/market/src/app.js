@@ -14,9 +14,9 @@ const $ = id => document.getElementById(id);
 const host = await connectHost();
 const settings = await host.request('settings.get');
 $('title').textContent = settings.title;
-let catalog = [], symbols = [], snapshot = {}, rules = [], editing, unsubscribe, offset = 0, loading = false;
+let catalog = [], symbols = [], snapshot = {}, rules = [], editing, unsubscribe, offset = 0, loading = false, historyRequest = 0;
 const statusNames = { connected: '连接正常', idle: '未订阅', connecting: '正在连接', reconnecting: '正在恢复', stopped: '连接停止' };
-const reasons = { initial_met: '启用时已到价', reached: '到价', crossed: '实时穿越', cooldown_due: '冷却后补提醒', recovered_met: '恢复后到价' };
+const reasons = { initial_met: '启用时已到价', reached: '到价', crossed: '实时穿越', cooldown_due: '冷却结束后到价', recovered_met: '恢复后到价' };
 const deliveryNames = { pending: '待递送', sending: '递送中', sent: '系统调用成功', failed: '失败', unknown: '结果不确定', expired: '已过期', suppressed: '已关闭' };
 const chartPage = key => `market-chart:${key.market}:${key.symbol}:${key.priceKind}`;
 const comparison = direction => direction === 'up' ? '≥' : '≤';
@@ -62,7 +62,7 @@ async function subscribe() {
     $('connection').textContent = statusNames[value.status] ?? value.status;
     $('connection').title = value.error ?? '';
     $('received').textContent = `${value.subscriptions} 个共享源流 · 代次 ${value.generation}`;
-    const sessions = Object.entries(value.sessions ?? {}).map(([event, v]) => `${({ EquityUpdate: '美国股票', CommodityUpdate: '商品', KR_EquityUpdate: '韩国股票', HK_EquityUpdate: '香港股票', CN_EquityUpdate: '中国股票', FXUpdate: '外汇' })[event] ?? event}：${v.generation === value.generation && value.sourceNow - v.time <= 10000 ? v.session : '时段数据过期'}`).join(' / ');
+    const sessions = Object.entries(value.sessions ?? {}).map(([event, v]) => `${({ EquityUpdate: '美国股票', CommodityUpdate: '商品', KR_EquityUpdate: '韩国股票', HK_EquityUpdate: '香港股票', CN_EquityUpdate: '中国股票', TW_EquityUpdate: '台湾股票', FXUpdate: '外汇' })[event] ?? event}：${v.generation === value.generation && value.sourceNow - v.time <= 10000 ? v.session : '时段数据过期'}`).join(' / ');
     if (sessions) $('tradfi-note').textContent = `标的市场时段：${sessions}。永续合约状态单列，休市不等于停盘。`;
     if (value.error) message(value.error);
     renderPrices(); updateWarning();
@@ -78,7 +78,7 @@ function renderRules() {
     const row = node('article', undefined, 'rule');
     const cross = r.condition === 'cross';
     const status = !r.enabled ? '已暂停' : s.completed ? '单次已完成' : s.pending ? '冷却中待复核' : '监控中';
-    const frequency = r.mode === 'once' ? '单次' : cross ? '每次穿越' : `重复 · 冷却 ${r.cooldownMs / 1000}s`;
+    const frequency = r.mode === 'once' ? '单次' : cross ? '每次穿越' : `重复 · 冷却 ${r.cooldownMs ? `${r.cooldownMs / 1000}s` : '默认'}`;
     const channel = !r.notification ? '关闭弹窗' : r.notificationChannel === 'island' ? '灵动通知' : 'Windows 通知';
     row.append(node('h3', r.name),
       node('div', `${r.key.symbol} · ${r.key.market === 'spot' ? '现货' : 'USDT 永续'} / ${r.key.priceKind === 'last' ? '成交' : '标记'} ${cross ? crossing(r.direction) : comparison(r.direction)} ${r.threshold}`),
@@ -120,7 +120,11 @@ form.onsubmit = async event => {
   } catch (error) { $('editor-error').textContent = String(error); } finally { $('save-rule').disabled = false; }
 };
 async function loadHistory() {
-  const events = await host.request('alerts.history', { offset, limit: 30 }); $('event-list').replaceChildren(); $('page').textContent = `第${offset / 30 + 1}页`; $('previous').disabled = offset === 0; $('next').disabled = events.length < 30;
+  const request = ++historyRequest;
+  const events = await host.request('alerts.history', { offset, limit: 30 });
+  if (request !== historyRequest) return;
+  if (!events.length && offset > 0) { offset = 0; return loadHistory(); }
+  $('event-list').replaceChildren(); $('page').textContent = `第${offset / 30 + 1}页`; $('previous').disabled = offset === 0; $('next').disabled = events.length < 30;
   if (!events.length) $('event-list').append(node('p', '尚无触发记录', 'empty'));
   for (const e of events) {
     const row = node('article', undefined, 'event');
@@ -143,7 +147,45 @@ async function loadHistory() {
     $('event-list').append(row);
   }
 }
-for (const el of document.querySelectorAll('[data-tab]')) el.onclick = () => void run(async () => { for (const b of document.querySelectorAll('[data-tab]')) b.classList.toggle('active', b === el); for (const id of ['quotes', 'rules', 'history']) $(id).hidden = id !== el.dataset.tab; if (el.dataset.tab === 'rules') await loadRules(); if (el.dataset.tab === 'history') await loadHistory(); });
+const historySettings = $('history-settings');
+const historyAuto = $('history-auto');
+const historyDays = $('history-days');
+const historySave = $('history-save');
+const historyClear = $('history-clear');
+function showHistorySettings({ days }) {
+  historyAuto.checked = days !== null;
+  if (days !== null) historyDays.value = days;
+  historyDays.disabled = !historyAuto.checked;
+  historySettings.hidden = false;
+}
+async function loadHistorySettings() {
+  if (host.preview) return;
+  try { showHistorySettings(await host.request('alerts.historySettings', {})); }
+  catch (error) { if (!String(error).includes('METHOD_NOT_FOUND')) throw error; }
+}
+historyAuto.onchange = () => { historyDays.disabled = !historyAuto.checked; };
+historySettings.onsubmit = event => {
+  event.preventDefault();
+  void run(async () => {
+    historySave.disabled = true;
+    const days = historyAuto.checked ? historyDays.valueAsNumber : null;
+    try {
+      showHistorySettings(await host.request('alerts.historySettings', { days }));
+      message('自动清理设置已保存');
+    } finally { historySave.disabled = false; }
+  });
+};
+historyClear.onclick = () => void run(async () => {
+  historyClear.disabled = true;
+  try {
+    if (!(await confirmAction('清空所有价格警报的触发日志？警报规则会继续运行。'))) return;
+    const { cleared } = await host.request('alerts.historyClear', {});
+    offset = 0;
+    await loadHistory();
+    message(`已清除 ${cleared} 条触发记录`);
+  } finally { historyClear.disabled = false; }
+});
+for (const el of document.querySelectorAll('[data-tab]')) el.onclick = () => void run(async () => { for (const b of document.querySelectorAll('[data-tab]')) b.classList.toggle('active', b === el); for (const id of ['quotes', 'rules', 'history']) $(id).hidden = id !== el.dataset.tab; if (el.dataset.tab === 'rules') await loadRules(); if (el.dataset.tab === 'history') { await loadHistory(); await loadHistorySettings(); } });
 $('search').oninput = renderSearch; $('search-form').onsubmit = e => e.preventDefault(); $('reload').onclick = () => void run(loadCatalog); $('new-rule').onclick = () => void run(() => openEditor()); $('cancel').onclick = () => $('editor').close(); $('refresh-history').onclick = () => void run(loadHistory); $('previous').onclick = () => void run(async () => { offset = Math.max(0, offset - 30); await loadHistory(); }); $('next').onclick = () => void run(async () => { offset += 30; await loadHistory(); });
 const requestedPage = new URLSearchParams(location.search).get('page');
 $('new-rule').hidden = !legacyVerification;

@@ -17,9 +17,18 @@
       <div class="fields"><label>方向<select name="direction"><option value="up">达到或高于 ≥</option><option value="down">达到或低于 ≤</option></select></label><label>阈值（USDT）<input name="threshold" required inputmode="decimal" pattern="[0-9]+(\.[0-9]+)?" placeholder="精确十进制"></label></div>
       <div class="fields"><label>模式<select name="mode"><option value="once">单次</option><option value="repeat">可重复</option></select></label><label>冷却秒数<input name="cooldown" type="number" min="0" max="604800" step="1" value="60" required></label></div>
       <div class="checks"><label><input name="enabled" type="checkbox" checked>启用</label><label><input name="notification" type="checkbox" checked>系统通知</label></div>
-      <p id="initial-warning" class="warning"></p><p class="hint">达到包含等号。持续处于同一侧不会周期重复；冷却中回到等待侧再到价，结束后用新鲜报价复核补提醒。</p><p id="editor-error" role="alert"></p><button class="primary" id="save-rule">保存规则</button>
+      <p id="initial-warning" class="warning"></p><p class="hint">达到包含等号。重复警报由宿主按冷却时间和新鲜报价判断。</p><p id="editor-error" role="alert"></p><button class="primary" id="save-rule">保存规则</button>
     </form></dialog>
   </section>
-  <section id="history" hidden><div class="section-head"><h2>逻辑事件与递送结果</h2><button id="refresh-history">刷新</button></div><div id="event-list"></div><div class="section-head"><button id="previous">上一页</button><span id="page">第1页</span><button id="next">下一页</button></div><p class="hint">系统调用成功不等于用户看到横幅。失败、不确定或过期可主动重试同一事件，最多3次；不生成新价格事件。</p></section>
+  <section id="history" hidden>
+    <div class="section-head"><h2>触发记录与递送结果</h2><button id="refresh-history" type="button">刷新</button></div>
+    <form id="history-settings" class="history-settings" hidden>
+      <label><input id="history-auto" type="checkbox" checked>自动清理</label>
+      <label>保留天数<input id="history-days" type="number" min="1" max="4294967295" step="1" value="3" required></label>
+      <button id="history-save" type="submit">保存</button>
+      <button id="history-clear" type="button">清空日志</button>
+    </form>
+    <div id="event-list"></div><div class="section-head"><button id="previous">上一页</button><span id="page">第1页</span><button id="next">下一页</button></div><p class="hint">系统调用成功不等于用户看到横幅。失败、不确定或过期可主动重试同一事件，最多3次；不生成新价格事件。</p>
+  </section>
   <footer><span id="received">等待新鲜数据</span><span>本地规则 · 无账户</span></footer>
 </main><script type="module" src="app.js"></script></body></html>
