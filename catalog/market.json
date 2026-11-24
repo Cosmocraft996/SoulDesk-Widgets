@@ -6,6 +6,21 @@
   "screenshots": [],
   "versions": [
     {
+      "version": "0.3.7",
+      "capabilities": [
+        "storage.instance",
+        "market.read",
+        "market.chart",
+        "alerts.manage"
+      ],
+      "sizeBytes": 111405,
+      "sha256": "e4f0a99a1f5d3559316f51a5918f30ef283f805498a47743aaf31cb5e95b695d",
+      "minHostVersion": "0.5.8",
+      "releaseNotes": "- 「触发历史」支持清空日志，以及自动清理和保留天数设置。默认保留最近 3 天，需配套支持清理的宿主。\n- 配套宿主的重复到价警报在冷却期结束后，收到仍满足条件的新鲜报价会再次触发。0 秒使用 5 秒默认冷却。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-market-v0.3.7/local.souldesk.market-0.3.7.zip"
+    },
+    {
       "version": "0.3.6",
       "capabilities": [
         "storage.instance",
