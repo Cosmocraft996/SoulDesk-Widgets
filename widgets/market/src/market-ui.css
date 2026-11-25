@@ -48,7 +48,7 @@ html:has(.market-body){background:#1b2425}
 .chart-legend{display:flex;align-items:center;flex-wrap:wrap;gap:5px 9px;min-height:31px;padding:3px 5px;color:var(--muted);font:11px var(--mono)}.chart-legend>strong{color:var(--ink);font:600 11px "Microsoft YaHei UI",sans-serif}
 #chart-indicators{display:inline-flex;gap:5px;flex-wrap:wrap;color:#9fb4ce}.chart-data .market-hint{padding:3px 5px}
 #chart-stage{position:relative}#chart-canvas{display:block;width:100%;height:clamp(350px, calc(100dvh - 124px), 1380px);cursor:crosshair;touch-action:none}
-#chart-canvas[data-price-label]{cursor:ns-resize}.chart-data #chart-save-status{color:var(--green)}
+#chart-canvas[data-chart-cursor="price"]{cursor:ns-resize}#chart-canvas[data-chart-cursor="time"]{cursor:ew-resize}#chart-canvas[data-chart-cursor="pan"]{cursor:grabbing}.chart-data #chart-save-status{color:var(--green)}
 #chart-empty{position:absolute;inset:0;display:grid;place-items:center;padding:15px;text-align:center;color:var(--muted);font-size:12px;pointer-events:none}
 #pick-alert{position:absolute;white-space:nowrap;max-width:100%;box-shadow:0 3px 10px #0008;color:var(--gold)}
 .chart-rules{min-width:0;border-left:1px solid var(--line);background:#202b2d;padding:9px;display:flex;flex-direction:column;gap:8px}.chart-rules h2 small{font-size:10px;color:var(--muted);font-weight:400}

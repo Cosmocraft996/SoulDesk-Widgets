@@ -16,7 +16,7 @@ document.body.innerHTML=`<main class="market-chart"><div class="chart-toolbar"><
   <p id="chart-error" class="market-message" role="status" hidden></p>
   <div class="chart-layout"><section class="chart-data"><div class="chart-legend"><strong id="chart-market"></strong><span id="chart-ohlc"></span><span id="candle-change"></span><span id="chart-indicators"></span></div>
   <div id="chart-stage"><canvas id="chart-canvas" role="img" aria-label="价格 K 线、成交量、指标和警报线"></canvas><div id="chart-empty" role="status">等待币安历史 K 线</div><button id="pick-alert" type="button" hidden>在此价位新建警报</button></div>
-  <p id="chart-foot" class="market-hint">滚轮缩放 · 拖动平移 · 右键选警报价位</p><p id="chart-save-status" class="market-hint" role="status" hidden></p></section>
+  <p id="chart-foot" class="market-hint">底部滚轮缩放时间 · 右轴滚轮缩放价格 · 拖动平移</p><p id="chart-save-status" class="market-hint" role="status" hidden></p></section>
   <aside class="chart-rules"><div class="dialog-head"><h2>价格警报 <small id="rules-count"></small></h2><button id="all-rules" type="button">全部警报</button></div>
   <div class="tool-row"><button id="alert-up" type="button">＋ 上方警报</button><button id="alert-down" type="button">＋ 下方警报</button></div>
   <div id="instrument-rules" class="instrument-rules"></div>
@@ -35,11 +35,14 @@ document.body.innerHTML=`<main class="market-chart"><div class="chart-toolbar"><
 
 const defaultMa=[5,10,30], maColors=['#e5b16a','#c094e0','#67c0ba','#a9d985','#a9c8ff','#f48a9e'];
 const duration={ '1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1h':3600000,'4h':14400000,'1d':86400000 };
+const defaultVisible=64, rightPadding=3, pageSize=500;
 const indicators={ma:true,boll:true,oi:isPerp};
 const canvas=$('chart-canvas');
 let period='5m', source=isPerp&&requestedSource==='mark'?'mark':'last', maPeriods=[...defaultMa], bars=[], interest=[], seriesWarning='', oiWarning='';
 $('chart-source').value=source;
-let rules=[], quotes=new Map(), visible=64, offset=0, loading=false, flow=0, cursor=null, drag=null, scale=null, editing=null, saving=false, draftSide='up', draftPrice=null, draftTouched=false;
+let visible=defaultVisible, offset=0, priceRange=null, cursor=null, drag=null, scale=null;
+let loading=false, flow=0, loadingHistory=false, historyDone=false, historyRetryAt=0;
+let rules=[], quotes=new Map(), editing=null, saving=false, draftSide='up', draftPrice=null, draftTouched=false;
 let ruleLabels=[], pendingLevel=null, rulesRequest=0;
 let draftId=null, autoSaveTimer=null, savePending=false, waitingForQuote=false;
 const sourceQuote=()=>quotes.get(quoteId(quoteKey(instrument,source)));
@@ -74,34 +77,103 @@ for (const key of Object.keys(indicators)) $(`toggle-${key}`).onclick=()=>{
   draw(); if (key==='oi'&&indicators.oi) void loadSeries();
 };
 
-async function loadSeries(reset=false) {
-  if (loading&&!reset) return;
-  const generation=++flow;
-  loading=true;
-  if (reset) { bars=[]; interest=[]; offset=0; cursor=null; drag=null; seriesWarning=''; oiWarning=''; draw(); }
-  const key=quoteKey(instrument,source), interval=period;
-  const previous=offset?bars[bars.length-offset-1]?.time:null;
-  const tasks=[host.request('market.candles',{key,interval,limit:500})];
-  if (isPerp&&indicators.oi) tasks.push(host.request('market.openInterest',{key:quoteKey(instrument),interval:period==='1m'?'5m':period,limit:500}));
-  const [priceResult,oiResult]=await Promise.allSettled(tasks);
-  if (generation!==flow) return;
-  loading=false;
-  if (priceResult.status==='fulfilled') {
-    bars=priceResult.value.rows; seriesWarning='';
-    if (previous) { const index=bars.findIndex(row=>row.time===previous); offset=index<0?Math.max(0,bars.length-visible):bars.length-index-1; }
-  } else seriesWarning=priceResult.reason?.message ?? 'K 线更新失败';
-  if (oiResult?.status==='fulfilled') { interest=oiResult.value.rows; oiWarning=''; }
-  else if (oiResult) oiWarning=oiResult.reason?.message ?? '未平仓量更新失败';
-  draw();
+const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+
+function firstAt(rows,time) {
+  let left=0, right=rows.length;
+  while (left<right) {
+    const mid=Math.floor((left+right)/2);
+    if (rows[mid].time<time) left=mid+1; else right=mid;
+  }
+  return left;
 }
 
-function activeBars() {
-  const q=freshQuote(), last=bars.at(-1);
-  if (!q||!last||q.sourceUtcMs<last.time||q.sourceUtcMs>last.closeTime) return bars;
+function mergeRows(existing,incoming,keepExisting=false) {
+  if (!incoming.length) return existing;
+  const start=firstAt(existing,incoming[0].time), end=firstAt(existing,incoming.at(-1).time+1);
+  const byTime=new Map(existing.slice(start,end).map(row=>[row.time,row]));
+  for (const row of incoming) if (!keepExisting||!byTime.has(row.time)) byTime.set(row.time,row);
+  return existing.slice(0,start).concat([...byTime.values()].sort((a,b)=>a.time-b.time),existing.slice(end));
+}
+
+function oldestOffset() {
+  return Math.max(0,(bars.at(-1).time-bars[0].time)/duration[period]+1-visible);
+}
+
+function resetView(count=defaultVisible) {
+  visible=count; offset=0; priceRange=null; cursor=null; drag=null;
+  canvas.removeAttribute('data-chart-cursor'); $('pick-alert').hidden=true;
+}
+
+async function loadSeries(reset=false) {
+  if (loading&&!reset) return;
+  if (reset) {
+    flow++; bars=[]; interest=[]; seriesWarning=''; oiWarning='';
+    loadingHistory=false; historyDone=false; historyRetryAt=0;
+    resetView(visible); draw();
+  }
+  const generation=flow;
+  loading=true;
+  const key=quoteKey(instrument,source), interval=period;
+  if (isPerp&&indicators.oi) void loadInterest(generation);
+  try {
+    const {rows}=await host.request('market.candles',{key,interval,limit:pageSize});
+    if (generation!==flow) return;
+    const previousLatest=bars.at(-1)?.time;
+    bars=mergeRows(bars,rows);
+    if (previousLatest&&offset>rightPadding) offset+=(bars.at(-1).time-previousLatest)/duration[interval];
+    seriesWarning=rows.length?'':'暂未取得 K 线';
+  } catch(error) {
+    if (generation===flow) seriesWarning=error?.message ?? 'K 线更新失败';
+  } finally {
+    if (generation===flow) { loading=false; draw(); }
+  }
+}
+
+async function loadInterest(generation,endTime) {
+  const args={key:quoteKey(instrument),interval:period==='1m'?'5m':period,limit:pageSize};
+  if (endTime!==undefined) args.endTime=endTime;
+  try {
+    const {rows}=await host.request('market.openInterest',args);
+    if (generation!==flow) return;
+    // 同一采样时间优先保留定时更新取得的数据。
+    interest=mergeRows(interest,rows,endTime!==undefined);
+    if (endTime===undefined) oiWarning='';
+  } catch(error) {
+    if (generation===flow&&endTime===undefined) oiWarning=error?.message ?? '未平仓量更新失败';
+  }
+  if (generation===flow) draw();
+}
+
+async function loadOlder() {
+  if (!bars.length||oldestOffset()-offset>Math.max(32,visible/2)||loadingHistory||historyDone||Date.now()<historyRetryAt) return;
+  const generation=flow, earliest=bars[0].time;
+  const endTime=earliest-1;
+  if (endTime<=0) { historyDone=true; draw(); return; }
+  loadingHistory=true; historyRetryAt=0; draw();
+  try {
+    const {rows}=await host.request('market.candles',{key:quoteKey(instrument,source),interval:period,limit:pageSize,endTime});
+    if (generation!==flow) return;
+    const older=rows.filter(row=>row.time<earliest);
+    historyDone=!older.length;
+    bars=mergeRows(bars,older,true);
+    if (older.length&&isPerp&&indicators.oi&&earliest>Date.now()-30*86400000&&earliest<(interest[0]?.time??Infinity)) {
+      void loadInterest(generation,earliest);
+    }
+  } catch {
+    if (generation===flow) historyRetryAt=Date.now()+10_000;
+  } finally {
+    if (generation===flow) { loadingHistory=false; draw(); }
+  }
+}
+
+function activeBar(last) {
+  const q=freshQuote();
+  if (!q||q.sourceUtcMs<last.time||q.sourceUtcMs>last.closeTime) return last;
   const live={...last,close:q.price};
   if (comparePrice(q.price,last.high)>0) live.high=q.price;
   if (comparePrice(q.price,last.low)<0) live.low=q.price;
-  return [...bars.slice(0,-1),live];
+  return live;
 }
 function overlays(data, first, last, length, deviations=false) {
   const closes=data.map(row=>Number(row.close));
@@ -126,24 +198,33 @@ const date=new Intl.DateTimeFormat('zh-CN',{month:'2-digit',day:'2-digit'});
 function draw() {
   ruleLabels=[];
   const context=canvasContext(canvas);
-  if (!context) return;
+  if (!context) { scale=null; return; }
   const {ctx,width,height}=context;
   const tf=duration[period], showVolume=source==='last', showOi=indicators.oi&&isPerp;
   $('chart-market').textContent=`币安 · ${marketName(instrument)} · ${source==='last'?'成交价':'标记价'}`;
   $('chart-empty').hidden=bars.length>0;
   $('chart-empty').textContent=seriesWarning||'等待币安历史 K 线';
-  $('chart-foot').textContent=[seriesWarning?'上次 K 线 · 更新失败':'滚轮缩放 · 拖动平移 · 右键选价 · 拖动右侧警报标签保存', showOi&&oiWarning?'OI 更新失败':showOi&&period==='1m'?'OI 每 5 分钟采样':''].filter(Boolean).join(' · ');
+  const historyStatus=loadingHistory?'正在加载更早的 K 线':historyRetryAt?'历史加载失败，稍后可继续拖动重试':
+    historyDone&&bars.length&&oldestOffset()-offset<1?'已到最早可用 K 线':'';
+  $('chart-foot').textContent=[seriesWarning&&bars.length?'上次 K 线更新失败':'底部滚轮缩放时间 · 右轴滚轮缩放价格 · 拖动平移 · 右键选价',
+    historyStatus,showOi&&oiWarning?'OI 更新失败':showOi&&period==='1m'?'OI 每 5 分钟采样':''].filter(Boolean).join(' · ');
   if (!bars.length || width<120 || height<135) { scale=null; $('chart-ohlc').textContent=''; $('candle-change').textContent=''; $('chart-indicators').textContent=''; return; }
-  const data=activeBars();
-  const end=Math.max(1,data.length-offset), start=Math.max(0,end-visible), rows=data.slice(start,end);
-  const maxTime=rows.at(-1).time, minTime=rows[0].time;
   const plot={left:12,right:width-98,top:16,axis:height-26};
   const volumeHeight=showVolume?62:0, oiHeight=showOi?80:0;
   plot.bottom=plot.axis-10-volumeHeight-oiHeight;
   if (plot.bottom-plot.top<35) { scale=null; return; }
+  const slots=visible+rightPadding, step=(plot.right-plot.left)/slots;
+  const latestTime=bars.at(-1).time;
+  const maxTime=latestTime+(rightPadding+.5-offset)*tf, minTime=maxTime-slots*tf;
+  const first=firstAt(bars,minTime-tf*.325), last=firstAt(bars,maxTime+tf*.325);
+  const warmup=Math.max(0,first-Math.max(20,...maPeriods)+1);
+  const data=bars.slice(warmup,last), start=first-warmup, end=data.length;
+  if (end&&last===bars.length) data[end-1]=activeBar(data[end-1]);
+  const rows=data.slice(start);
   const ma=indicators.ma?maPeriods.map(length=>overlays(data,start,end,length)):[];
   const boll=indicators.boll?overlays(data,start,end,20,true):[];
-  const rangeValues=rows.flatMap(row=>[Number(row.low),Number(row.high)]);
+  const rangeRows=rows.length?rows:[bars[first]??bars.at(-1)];
+  const rangeValues=rangeRows.flatMap(row=>[Number(row.low),Number(row.high)]);
   rangeValues.push(...ma.flat().filter(p=>p!==null),...boll.filter(Boolean).flatMap(row=>[row.lower,row.upper]));
   const rawLow=Math.min(...rangeValues), rawHigh=Math.max(...rangeValues), spread=rawHigh-rawLow || rawHigh*.004;
   const draft=$('chart-rule-form').hidden?null:Number($('alert-threshold').value)||null;
@@ -151,10 +232,10 @@ function draw() {
   const moving=drag?.rule ? drag : pendingLevel;
   const alertPrice=rule=>moving?.id===rule.id ? moving.threshold : rule.threshold;
   const near=[draft,...onSource.map(({rule})=>Number(alertPrice(rule)))].filter(p=>p!==null&&p>=rawLow-spread*.45&&p<=rawHigh+spread*.45);
-  const low=drag?.rule ? drag.axis.low : Math.max(0,Math.min(rawLow,...near)-spread*.12);
-  const high=drag?.rule ? drag.axis.high : Math.max(rawHigh,...near)+spread*.13;
-  const step=(plot.right-plot.left)/Math.max(5,(maxTime-minTime)/tf+4);
-  const x=time=>plot.left+(time-minTime)/tf*step+step/2;
+  const fixedRange=drag?.rule||drag?.line?drag.axis:priceRange;
+  const low=fixedRange?.low ?? Math.max(0,Math.min(rawLow,...near)-spread*.12);
+  const high=fixedRange?.high ?? Math.max(rawHigh,...near)+spread*.13;
+  const x=time=>plot.left+(time-minTime)/tf*step;
   const y=value=>plot.top+(high-value)*(plot.bottom-plot.top)/(high-low);
   scale={...plot,step,low,high,y};
   ctx.font='11px Consolas, monospace'; ctx.textBaseline='middle';
@@ -165,9 +246,11 @@ function draw() {
   }
   const tickCount=width<450?3:5;
   for (let i=0;i<tickCount;i++) {
-    const row=rows[Math.round((rows.length-1)*i/(tickCount-1))], lineX=x(row.time);
+    const slot=(minTime-latestTime)/tf+visible*i/(tickCount-1)+.5;
+    const time=latestTime+Math.round(slot)*tf;
+    const lineX=x(time);
     drawLine(ctx,lineX,plot.top,lineX,plot.axis,'#2b383a');
-    ctx.fillStyle='#b1bfba'; ctx.fillText((period==='1d'?date:period==='1h'||period==='4h'?calendar:clock).format(row.time),lineX-2,height-10,90);
+    ctx.fillStyle='#b1bfba'; ctx.fillText((period==='1d'?date:period==='1h'||period==='4h'||maxTime-minTime>=duration['1d']?calendar:clock).format(time),lineX-2,height-10,90);
   }
   drawLine(ctx,plot.right,plot.top,plot.right,plot.axis,'#48575a');
   drawLine(ctx,plot.left,plot.axis,plot.right,plot.axis,'#48575a');
@@ -188,16 +271,26 @@ function draw() {
     });
     ctx.stroke();
   }
-  if (boll.length) for (const [field,color] of [['upper','#7096bc'],['mean','#62798e'],['lower','#7096bc']]) drawSeries(boll.map(value=>value?.[field]??null),color);
   const body=Math.max(1,Math.min(16,step*.65));
+  ctx.save(); ctx.beginPath(); ctx.rect(plot.left,plot.top,plot.right-plot.left,plot.bottom-plot.top); ctx.clip();
+  if (boll.length) for (const [field,color] of [['upper','#7096bc'],['mean','#62798e'],['lower','#7096bc']]) drawSeries(boll.map(value=>value?.[field]??null),color);
   for (const row of rows) {
     const up=comparePrice(row.close,row.open)>=0, color=up?'#65d9b2':'#f98f89', lineX=x(row.time);
     const open=y(Number(row.open)), close=y(Number(row.close));
     drawLine(ctx,lineX,y(Number(row.high)),lineX,y(Number(row.low)),color);
     ctx.fillStyle=color;ctx.fillRect(lineX-body/2,Math.min(open,close),body,Math.max(1,Math.abs(open-close)));
-    if (showVolume) { const h=Number(row.volume)/maxVolume*41; ctx.fillStyle=up?'#307964':'#814c49'; ctx.fillRect(lineX-body/2,volumeBottom-h,body,h); }
   }
   ma.forEach((values,i)=>drawSeries(values,maColors[i]));
+  ctx.restore();
+  if (showVolume) {
+    ctx.save(); ctx.beginPath(); ctx.rect(plot.left,plot.bottom,plot.right-plot.left,volumeHeight+6); ctx.clip();
+    for (const row of rows) {
+      const h=Number(row.volume)/maxVolume*41;
+      ctx.fillStyle=comparePrice(row.close,row.open)>=0?'#307964':'#814c49';
+      ctx.fillRect(x(row.time)-body/2,volumeBottom-h,body,h);
+    }
+    ctx.restore();
+  }
   const labels=ma.map((_,i)=>{ const el=element('span',`MA${maPeriods[i]}`); el.style.color=maColors[i]; return el; });
   if (boll.length) labels.push(element('span','BOLL 20 / 2'));
   $('chart-indicators').replaceChildren(...labels);
@@ -205,7 +298,7 @@ function draw() {
   if (showOi) {
     const top=plot.bottom+volumeHeight+11;
     drawLine(ctx,plot.left,top,plot.right,top,'#465960');
-    const points=interest.filter(point=>point.time>=minTime&&point.time<=maxTime+tf);
+    const points=interest.slice(firstAt(interest,minTime),firstAt(interest,maxTime+1));
     ctx.fillStyle='#c3b9ff';
     const p=points.at(-1);
     ctx.fillText(p?`OI 未平仓量 · ${formatPrice(p.value)} ${instrument.baseAsset ?? ''}`:'OI 未平仓量 · 暂无数据',plot.left+4,top+13);
@@ -242,13 +335,15 @@ function draw() {
     level(draft,formatPrice($('alert-threshold').value),'#edbc77',[5,4]);
   }
   const live=freshQuote();
-  if (!offset&&live) level(Number(live.price),formatPrice(live.price),'#76c9af',[2,4]);
+  if (live&&latestTime<=maxTime) level(Number(live.price),formatPrice(live.price),'#76c9af',[2,4]);
   let focus=rows.at(-1);
-  if (cursor && cursor.x>=plot.left&&cursor.x<=plot.right&&cursor.y>=plot.top&&cursor.y<=plot.bottom) {
+  if (focus&&cursor&&cursor.x>=plot.left&&cursor.x<=plot.right&&cursor.y>=plot.top&&cursor.y<=plot.bottom) {
     focus=rows.reduce((a,b)=>Math.abs(x(a.time)-cursor.x)<Math.abs(x(b.time)-cursor.x)?a:b);
-    drawLine(ctx,x(focus.time),plot.top,x(focus.time),plot.axis,'#758783',[3,4]);
+    const focusX=x(focus.time), crossX=Math.abs(focusX-cursor.x)<=step/2?focusX:cursor.x;
+    drawLine(ctx,crossX,plot.top,crossX,plot.axis,'#758783',[3,4]);
     drawLine(ctx,plot.left,cursor.y,plot.right,cursor.y,'#758783',[3,4]);
   }
+  if (!focus) { $('chart-ohlc').textContent=''; $('chart-ohlc').title=''; $('candle-change').textContent=''; return; }
   $('chart-ohlc').textContent=[['开',focus.open],['高',focus.high],['低',focus.low],['收',focus.close]].map(([label,p])=>`${label} ${formatPrice(p)}`).join('　');
   $('chart-ohlc').title=timeText(focus.time);
   const change=(Number(focus.close)/Number(focus.open)-1)*100;
@@ -473,10 +568,25 @@ $('chart-source').onchange=()=>{
   void afterDraftSave(()=>{ source=requested; $('chart-source').value=source; clearDraft(); void loadSeries(true); });
 };
 $('chart-period').onchange=()=>{ period=$('chart-period').value; void loadSeries(true); };
-$('chart-reset').onclick=()=>{ offset=0; visible=64; draw(); };
+$('chart-reset').onclick=()=>{ resetView(); draw(); };
 const point=event=>{ const rect=canvas.getBoundingClientRect(); return {x:event.clientX-rect.left,y:event.clientY-rect.top}; };
 const ruleAt=({x,y})=>ruleLabels.find(label=>x>=label.left&&x<=label.right&&y>=label.top&&y<=label.bottom)?.rule;
-function pointPrice(y,axis=scale) { return Math.max(0,axis.high-(axis.high-axis.low)*Math.max(0,Math.min(1,(y-axis.top)/(axis.bottom-axis.top)))); }
+function chartZone({x,y}) {
+  if (!scale||y<scale.top) return '';
+  if (x>=scale.right&&y<=scale.bottom) return 'price';
+  if (x<scale.left||x>scale.right) return '';
+  return y>=scale.axis?'time':'plot';
+}
+function updateChartCursor(at) {
+  const zone=chartZone(at);
+  const style=drag?.rule||drag?.line||ruleAt(at)||zone==='price'?'price':drag?'pan':zone==='time'?'time':'';
+  if (style) canvas.dataset.chartCursor=style; else canvas.removeAttribute('data-chart-cursor');
+}
+function pointPrice(y,axis=scale) { return axis.high-(axis.high-axis.low)*clamp((y-axis.top)/(axis.bottom-axis.top),0,1); }
+function setPriceRange(low,span) {
+  const bottom=Math.max(0,low), top=bottom+span;
+  if (Number.isFinite(top)&&top>bottom) priceRange={low:bottom,high:top};
+}
 function draggedThreshold(gesture,clientY) {
   return chartPrice(pointPrice(gesture.axis.y(Number(gesture.rule.threshold))+clientY-gesture.clientY,gesture.axis));
 }
@@ -511,38 +621,64 @@ async function saveDraggedRule(rule,threshold) {
 }
 canvas.oncontextmenu=event=>{
   event.preventDefault(); const at=point(event);
-  if (!scale||at.y<scale.top||at.y>scale.bottom) return;
+  if (chartZone(at)!=='plot'||at.y>scale.bottom) return;
   draftPrice=chartPrice(pointPrice(at.y));
   const menu=$('pick-alert'); menu.hidden=false;
   menu.style.left=`${Math.max(4,Math.min(at.x+4,canvas.clientWidth-menu.offsetWidth-4))}px`; menu.style.top=`${at.y+3}px`;
 };
 $('pick-alert').onclick=()=>{ const price=draftPrice; $('pick-alert').hidden=true; void afterDraftSave(()=>newDraft('up',price)); };
 canvas.addEventListener('wheel',event=>{
-  if (!scale) return;
-  event.preventDefault(); if (drag?.rule) return;
-  visible=Math.min(160,Math.max(15,visible+Math.sign(event.deltaY)*7));
-  offset=Math.max(0,Math.min(offset,bars.length-visible)); $('pick-alert').hidden=true; draw();
+  const at=point(event), zone=chartZone(at);
+  if (!zone) return;
+  event.preventDefault();
+  const direction=Math.sign(event.deltaY);
+  if (drag||!direction) return;
+  if (zone==='price') {
+    const anchor=pointPrice(at.y), span=scale.high-scale.low;
+    const minSpan=Math.max(10**(-pricePlaces()),Number(instrument.tickSize)||0,anchor*1e-10)*4;
+    const nextSpan=Math.max(Math.min(span,minSpan),span*1.15**direction);
+    setPriceRange(anchor-(anchor-scale.low)/span*nextSpan,nextSpan);
+  } else {
+    const previous=visible, fraction=(at.x-scale.left)/(scale.right-scale.left);
+    visible=clamp(previous+direction*7,15,160);
+    offset=clamp(offset+(1-fraction)*(previous-visible),1-visible,oldestOffset());
+  }
+  $('pick-alert').hidden=true; draw();
+  if (zone!=='price') void loadOlder();
 },{passive:false});
 canvas.onpointerdown=event=>{
   if (event.button!==0||!scale||drag) return;
   const at=point(event), p=Number($('alert-threshold').value);
-  const rule=ruleAt(at);
-  const line=!rule&&!ruleForm.hidden&&Number.isFinite(p)&&p>0&&Math.abs(at.y-scale.y(p))<7;
+  const rule=ruleAt(at), zone=chartZone(at);
+  if (!rule&&!zone) return;
+  const onPricePlot=zone==='plot'&&at.y<=scale.bottom;
+  const line=!rule&&onPricePlot&&!ruleForm.hidden&&p>=scale.low&&p<=scale.high&&p>0&&Math.abs(at.y-scale.y(p))<7;
   if ((rule||line)&&(saving||autoSaveTimer!==null)) return;
-  drag={pointerId:event.pointerId,offset,x:at.x,clientY:event.clientY,axis:scale,rule,id:rule?.id,threshold:rule?.threshold,line,draftBefore:$('alert-threshold').value};
+  drag={pointerId:event.pointerId,x:at.x,clientY:event.clientY,axis:scale,zone,vertical:zone==='price'||onPricePlot,
+    rule,id:rule?.id,threshold:rule?.threshold,line,draftBefore:$('alert-threshold').value};
   if (rule) { message('chart-error'); message('chart-save-status'); }
-  canvas.toggleAttribute('data-price-label',Boolean(rule));
+  updateChartCursor(at);
   canvas.setPointerCapture(event.pointerId); $('pick-alert').hidden=true;
 };
 canvas.onpointermove=event=>{
   if (drag&&event.pointerId!==drag.pointerId) return;
   cursor=point(event);
-  canvas.toggleAttribute('data-price-label',Boolean(drag?.rule||(!drag&&ruleAt(cursor))));
+  updateChartCursor(cursor);
   if (drag?.rule) {
     if (Math.abs(event.clientY-drag.clientY)>=3 || drag.threshold!==drag.rule.threshold) drag.threshold=draggedThreshold(drag,event.clientY);
   }
   else if (drag?.line) { $('alert-threshold').value=chartPrice(pointPrice(cursor.y,drag.axis)); explainDraft(); }
-  else if (drag) offset=Math.max(0,Math.min(Math.max(0,bars.length-visible),drag.offset+Math.round((cursor.x-drag.x)/drag.axis.step)));
+  else if (drag) {
+    const dx=cursor.x-drag.x, dy=event.clientY-drag.clientY;
+    if (drag.zone!=='price'&&dx) offset=clamp(offset+dx/drag.axis.step,1-visible,oldestOffset());
+    drag.x=cursor.x;
+    if (drag.vertical&&(drag.priceMoved||Math.abs(dy)>=3)) {
+      const {low,high,top,bottom}=drag.axis, span=high-low;
+      drag.priceMoved=true;
+      setPriceRange(low+dy*span/(bottom-top),span);
+    }
+    if (drag.zone!=='price'&&dx>0) void loadOlder();
+  }
   draw();
 };
 canvas.onpointerup=event=>{
@@ -558,14 +694,14 @@ canvas.onpointerup=event=>{
   }
   else if (gesture.line&&$('alert-threshold').value!==gesture.draftBefore) { draftTouched=true; queueDraftSave(); }
   else if (savePending) queueDraftSave();
-  canvas.toggleAttribute('data-price-label',Boolean(ruleAt(at)));
+  updateChartCursor(at);
   draw();
 };
-canvas.onpointerleave=()=>{ cursor=null; canvas.toggleAttribute('data-price-label',Boolean(drag?.rule)); draw(); };
+canvas.onpointerleave=()=>{ cursor=null; if (!drag) canvas.removeAttribute('data-chart-cursor'); draw(); };
 function cancelPointer(event) {
   if (event.pointerId!==drag?.pointerId) return;
   if (drag.line) $('alert-threshold').value=drag.draftBefore;
-  drag=null; canvas.removeAttribute('data-price-label'); draw();
+  drag=null; canvas.removeAttribute('data-chart-cursor'); draw();
   if (savePending) queueDraftSave();
 }
 canvas.onpointercancel=canvas.onlostpointercapture=cancelPointer;
