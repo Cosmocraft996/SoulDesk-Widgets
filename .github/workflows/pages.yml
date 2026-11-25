@@ -3,6 +3,14 @@ name: 部署官方组件广场
 on:
   push:
     branches: [main]
+    paths:
+      - '.github/workflows/pages.yml'
+      - 'catalog/**'
+      - 'site/**'
+      - 'widgets/*/preview/**'
+      - 'scripts/catalog.py'
+      - 'scripts/widget.py'
+      - 'docs/catalog-public-key.pem'
   workflow_dispatch:
 
 permissions:
@@ -18,7 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: read
       pages: write
       id-token: write
     env:
@@ -63,54 +70,55 @@ jobs:
           name: ${{ env.PAGES_ARTIFACT_NAME }}
           path: artifacts/site
       - name: 等待 Pages 部署产物可见
+        uses: actions/github-script@v8
         timeout-minutes: 1
         env:
-          GH_TOKEN: ${{ github.token }}
           PAGES_ARTIFACT_ID: ${{ steps.upload.outputs.artifact_id }}
-        run: |
-          python - <<'PY'
-          import json
-          import os
-          import time
-          from urllib.error import HTTPError, URLError
-          from urllib.parse import urlencode
-          from urllib.request import Request, urlopen
+        with:
+          script: |
+            const name = process.env.PAGES_ARTIFACT_NAME;
+            const artifactId = process.env.PAGES_ARTIFACT_ID;
+            if (!/^\d+$/.test(artifactId)) throw new Error('上传步骤未返回有效的 Pages 产物 ID');
 
-          artifact_id = os.environ["PAGES_ARTIFACT_ID"]
-          if not artifact_id.isdecimal():
-              raise SystemExit("上传步骤未返回有效的 Pages 产物 ID")
-          name = os.environ["PAGES_ARTIFACT_NAME"]
-          api, repo, run = (os.environ[key] for key in ("GITHUB_API_URL", "GITHUB_REPOSITORY", "GITHUB_RUN_ID"))
-          query = urlencode({"name": name})
-          request = Request(f"{api}/repos/{repo}/actions/runs/{run}/artifacts?{query}", headers={
-              "Accept": "application/vnd.github+json",
-              "Authorization": "Bearer " + os.environ["GH_TOKEN"],
-              "Cache-Control": "no-cache",
-          })
+            // 使用 deploy-pages@v4 的产物查询服务。运行器向 JavaScript 动作提供该服务的地址和令牌。
+            const { ACTIONS_RUNTIME_TOKEN: token, ACTIONS_RESULTS_URL: serviceUrl } = process.env;
+            const claims = token?.split('.')[1];
+            if (!claims || !serviceUrl) throw new Error('运行器缺少产物服务配置');
+            const { scp } = JSON.parse(Buffer.from(claims, 'base64url').toString('utf8'));
+            const scope = scp?.split(' ').find(value => value.startsWith('Actions.Results:'))?.split(':');
+            if (scope?.length !== 3 || !scope[1] || !scope[2]) {
+              throw new Error('运行器令牌缺少当前任务的产物服务范围');
+            }
+            const [, workflowRunBackendId, workflowJobRunBackendId] = scope;
+            const endpoint = new URL('/twirp/github.actions.results.api.v1.ArtifactService/ListArtifacts', serviceUrl);
+            const request = {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+              body: JSON.stringify({
+                workflow_run_backend_id: workflowRunBackendId,
+                workflow_job_run_backend_id: workflowJobRunBackendId,
+              }),
+              redirect: 'error',
+            };
 
-          # 部署动作通过内部接口按名称查找产物。先留出登记时间，再通过公开接口核对本次上传。
-          for attempt in range(1, 9):
-              time.sleep(3)
-              try:
-                  with urlopen(request, timeout=3) as response:
-                      artifacts = json.load(response)["artifacts"]
-              except HTTPError as error:
-                  if error.code not in (404, 429) and not 500 <= error.code < 600:
-                      raise SystemExit(f"检查 Pages 产物失败（HTTP {error.code}）") from None
-                  delay_reason = f"GitHub API 返回 HTTP {error.code}"
-              except (TimeoutError, URLError):
-                  delay_reason = "暂时无法连接 GitHub API"
-              else:
-                  if artifacts:
-                      if len(artifacts) != 1 or str(artifacts[0]["id"]) != artifact_id or artifacts[0]["expired"]:
-                          raise SystemExit(f"名称为 {name} 的产物与本次上传的 ID {artifact_id} 不匹配或已过期")
-                      print(f"Pages 产物 {name}（ID {artifact_id}）已可见")
-                      break
-                  delay_reason = "产物尚未出现在本次运行的列表中"
-              print(f"等待 Pages 产物 {name}（{attempt}/8）：{delay_reason}", flush=True)
-          else:
-              raise SystemExit(f"等待 Pages 产物 {name}（ID {artifact_id}）超时：{delay_reason}")
-          PY
+            const attempts = 8;
+            for (let attempt = 1; attempt <= attempts; attempt++) {
+              const response = await fetch(endpoint, { ...request, signal: AbortSignal.timeout(4000) });
+              if (!response.ok) throw new Error(`查询 Pages 内部产物失败（HTTP ${response.status}）`);
+              const { artifacts = [] } = await response.json();
+              if (!Array.isArray(artifacts)) throw new Error('Pages 内部接口返回的产物列表格式无效');
+              const matches = artifacts.filter(artifact => artifact.name === name);
+              if (matches.length > 1) throw new Error(`发现多个同名 Pages 产物 ${name}`);
+              if (matches.length === 1) {
+                const id = matches[0].database_id ?? matches[0].databaseId;
+                if (String(id) !== artifactId) throw new Error(`Pages 产物 ${name} 的 ID 与本次上传不符`);
+                core.info(`Pages 内部接口已查到产物 ${name}（ID ${artifactId}）`);
+                return;
+              }
+              core.info(`Pages 内部接口暂未查到产物 ${name}（${attempt}/${attempts}）`);
+              if (attempt < attempts) await new Promise(resolve => setTimeout(resolve, 3000));
+            }
+            throw new Error(`等待 Pages 内部接口登记产物 ${name}（ID ${artifactId}）超时`);
       - uses: actions/deploy-pages@v4
         id: deploy
         with:
