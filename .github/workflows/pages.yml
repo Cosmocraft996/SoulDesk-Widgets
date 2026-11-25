@@ -18,8 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read
       pages: write
       id-token: write
+    env:
+      PAGES_ARTIFACT_NAME: github-pages-${{ github.run_attempt }}
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
@@ -55,7 +58,60 @@ jobs:
             -in artifacts/site/catalog.json -sigfile artifacts/site/catalog.json.sig
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
+        id: upload
         with:
+          name: ${{ env.PAGES_ARTIFACT_NAME }}
           path: artifacts/site
+      - name: 等待 Pages 部署产物可见
+        timeout-minutes: 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGES_ARTIFACT_ID: ${{ steps.upload.outputs.artifact_id }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import time
+          from urllib.error import HTTPError, URLError
+          from urllib.parse import urlencode
+          from urllib.request import Request, urlopen
+
+          artifact_id = os.environ["PAGES_ARTIFACT_ID"]
+          if not artifact_id.isdecimal():
+              raise SystemExit("上传步骤未返回有效的 Pages 产物 ID")
+          name = os.environ["PAGES_ARTIFACT_NAME"]
+          api, repo, run = (os.environ[key] for key in ("GITHUB_API_URL", "GITHUB_REPOSITORY", "GITHUB_RUN_ID"))
+          query = urlencode({"name": name})
+          request = Request(f"{api}/repos/{repo}/actions/runs/{run}/artifacts?{query}", headers={
+              "Accept": "application/vnd.github+json",
+              "Authorization": "Bearer " + os.environ["GH_TOKEN"],
+              "Cache-Control": "no-cache",
+          })
+
+          # 部署动作通过内部接口按名称查找产物。先留出登记时间，再通过公开接口核对本次上传。
+          for attempt in range(1, 9):
+              time.sleep(3)
+              try:
+                  with urlopen(request, timeout=3) as response:
+                      artifacts = json.load(response)["artifacts"]
+              except HTTPError as error:
+                  if error.code not in (404, 429) and not 500 <= error.code < 600:
+                      raise SystemExit(f"检查 Pages 产物失败（HTTP {error.code}）") from None
+                  delay_reason = f"GitHub API 返回 HTTP {error.code}"
+              except (TimeoutError, URLError):
+                  delay_reason = "暂时无法连接 GitHub API"
+              else:
+                  if artifacts:
+                      if len(artifacts) != 1 or str(artifacts[0]["id"]) != artifact_id or artifacts[0]["expired"]:
+                          raise SystemExit(f"名称为 {name} 的产物与本次上传的 ID {artifact_id} 不匹配或已过期")
+                      print(f"Pages 产物 {name}（ID {artifact_id}）已可见")
+                      break
+                  delay_reason = "产物尚未出现在本次运行的列表中"
+              print(f"等待 Pages 产物 {name}（{attempt}/8）：{delay_reason}", flush=True)
+          else:
+              raise SystemExit(f"等待 Pages 产物 {name}（ID {artifact_id}）超时：{delay_reason}")
+          PY
       - uses: actions/deploy-pages@v4
         id: deploy
+        with:
+          artifact_name: ${{ env.PAGES_ARTIFACT_NAME }}
