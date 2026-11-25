@@ -6,6 +6,21 @@
   "screenshots": [],
   "versions": [
     {
+      "version": "0.3.10",
+      "capabilities": [
+        "storage.instance",
+        "market.read",
+        "market.chart",
+        "alerts.manage"
+      ],
+      "sizeBytes": 118090,
+      "sha256": "dd40ecb101ef2a4e32fdb7835502956d4ff8fb64f7bfcac63cd54f7792b187d3",
+      "minHostVersion": "0.5.8",
+      "releaseNotes": "- 记住最近一次选择的 K 线周期。重新打开时，同一行情组件实例中的所有品种共用该周期，首次仍默认 1 小时。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-market-v0.3.10/local.souldesk.market-0.3.10.zip"
+    },
+    {
       "version": "0.3.9",
       "capabilities": [
         "storage.instance",
