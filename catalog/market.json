@@ -6,6 +6,21 @@
   "screenshots": [],
   "versions": [
     {
+      "version": "0.3.8",
+      "capabilities": [
+        "storage.instance",
+        "market.read",
+        "market.chart",
+        "alerts.manage"
+      ],
+      "sizeBytes": 116844,
+      "sha256": "05c88d4e09b462c2544a5392f58f7a63643e39c6386e939dd2e92eb8afc14c09",
+      "minHostVersion": "0.5.8",
+      "releaseNotes": "- K 线底部时间轴、右侧价格轴支持滚轮缩放。拖动绘图区可横向平移和上下移动价格画面，也可以在最新 K 线右侧留白。\n- 拖到历史边缘时自动加载更早的 K 线。查看历史时保持当前时间位置，继续更新最新 K 线。点击「回到最新」恢复默认缩放和自动价格范围。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-market-v0.3.8/local.souldesk.market-0.3.8.zip"
+    },
+    {
       "version": "0.3.7",
       "capabilities": [
         "storage.instance",
