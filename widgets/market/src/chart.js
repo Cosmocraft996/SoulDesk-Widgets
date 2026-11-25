@@ -10,10 +10,11 @@ const host=await connectHost();
 document.body.className='market-body chart-body';
 document.body.innerHTML=`<main class="market-chart"><div class="chart-toolbar"><strong id="chart-title"></strong>
   <select id="chart-source" aria-label="价格来源"><option value="last">成交价</option><option value="mark">标记价</option></select>
-  <select id="chart-period" aria-label="K 线周期"><option value="1m">1 分</option><option value="5m">5 分</option><option value="15m">15 分</option><option value="30m">30 分</option><option value="1h" selected>1 时</option><option value="4h">4 时</option><option value="1d">1 日</option></select>
+  <select id="chart-period" aria-label="K 线周期" disabled><option value="1m">1 分</option><option value="5m">5 分</option><option value="15m">15 分</option><option value="30m">30 分</option><option value="1h" selected>1 时</option><option value="4h">4 时</option><option value="1d">1 日</option></select>
   <button id="toggle-ma" type="button" aria-pressed="true">MA</button><button id="ma-config" type="button">MA 设置</button><button id="toggle-boll" type="button" aria-pressed="true">BOLL</button><button id="toggle-oi" type="button" aria-pressed="true">OI</button>
   <button id="chart-reset" type="button">回到最新</button><button id="chart-history" type="button">触发历史</button></div>
   <p id="chart-error" class="market-message" role="status" hidden></p>
+  <p id="chart-period-error" class="market-message" role="status" hidden></p>
   <div class="chart-layout"><section class="chart-data"><div class="chart-legend"><strong id="chart-market"></strong><span id="chart-ohlc"></span><span id="candle-change"></span><span id="chart-indicators"></span></div>
   <div id="chart-stage"><canvas id="chart-canvas" role="img" aria-label="价格 K 线、成交量、指标和警报线"></canvas><div id="chart-empty" role="status">等待币安历史 K 线</div><button id="pick-alert" type="button" hidden>在此价位新建警报</button></div>
   <p id="chart-foot" class="market-hint">底部滚轮缩放时间 · 右轴滚轮缩放价格 · 拖动平移</p><p id="chart-save-status" class="market-hint" role="status" hidden></p></section>
@@ -40,6 +41,7 @@ const indicators={ma:true,boll:true,oi:isPerp};
 const canvas=$('chart-canvas');
 const chartPeriod=$('chart-period');
 let period=chartPeriod.value, source=isPerp&&requestedSource==='mark'?'mark':'last', maPeriods=[...defaultMa], bars=[], interest=[], seriesWarning='', oiWarning='';
+let chartStorage=null, seriesReady=false;
 $('chart-source').value=source;
 let visible=defaultVisible, offset=0, priceRange=null, cursor=null, drag=null, scale=null;
 let loading=false, flow=0, loadingHistory=false, historyDone=false, historyRetryAt=0;
@@ -50,6 +52,30 @@ const sourceQuote=()=>quotes.get(quoteId(quoteKey(instrument,source)));
 const freshQuote=()=>{ const q=sourceQuote(); return q?.quality==='fresh'?q:null; };
 const message=(id,value='')=>{ $(id).textContent=value; $(id).hidden=!value; };
 const fail=error=>message('chart-error',error?.message ?? String(error));
+
+async function restoreChartPeriod() {
+  try {
+    chartStorage=await host.request('storage.get');
+    const saved=chartStorage?.chartPeriod;
+    if (typeof saved==='string'&&Object.hasOwn(duration,saved)) period=chartPeriod.value=saved;
+  } catch(error) {
+    message('chart-period-error',`无法读取上次 K 线周期：${error.message}`);
+  }
+}
+
+async function rememberChartPeriod(selected) {
+  if (host.preview) return;
+  chartPeriod.disabled=true;
+  try {
+    const saved=chartStorage??await host.request('storage.get');
+    chartStorage=await host.request('storage.set',{...saved,chartPeriod:selected});
+    message('chart-period-error');
+  } catch(error) {
+    message('chart-period-error',`K 线周期未保存：${error.message}`);
+  } finally {
+    chartPeriod.disabled=false;
+  }
+}
 
 $('chart-title').textContent=pair(instrument);
 $('chart-source').options[1].disabled=!isPerp;
@@ -107,7 +133,7 @@ function resetView(count=defaultVisible) {
 }
 
 async function loadSeries(reset=false) {
-  if (loading&&!reset) return;
+  if (!seriesReady||(loading&&!reset)) return;
   if (reset) {
     flow++; bars=[]; interest=[]; seriesWarning=''; oiWarning='';
     loadingHistory=false; historyDone=false; historyRetryAt=0;
@@ -568,7 +594,12 @@ $('chart-source').onchange=()=>{
   $('chart-source').value=source;
   void afterDraftSave(()=>{ source=requested; $('chart-source').value=source; clearDraft(); void loadSeries(true); });
 };
-chartPeriod.onchange=()=>{ period=chartPeriod.value; void loadSeries(true); };
+chartPeriod.onchange=()=>{
+  if (chartPeriod.disabled||!Object.hasOwn(duration,chartPeriod.value)||chartPeriod.value===period) return;
+  period=chartPeriod.value;
+  void rememberChartPeriod(period);
+  void loadSeries(true);
+};
 $('chart-reset').onclick=()=>{ resetView(); draw(); };
 const point=event=>{ const rect=canvas.getBoundingClientRect(); return {x:event.clientX-rect.left,y:event.clientY-rect.top}; };
 const ruleAt=({x,y})=>ruleLabels.find(label=>x>=label.left&&x<=label.right&&y>=label.top&&y<=label.bottom)?.rule;
@@ -711,6 +742,7 @@ new ResizeObserver(draw).observe($('chart-stage'));
 await host.ready();
 if (host.preview) $('chart-empty').textContent='隔离试加载';
 else {
+  const restoredPeriod=restoreChartPeriod();
   void host.subscribe(isPerp?[quoteKey(instrument),quoteKey(instrument,'mark')]:[quoteKey(instrument)],snapshot=>{
     if (snapshot.error&&!snapshot.quotes) { fail(snapshot.error); return; }
     quotes=new Map(snapshot.quotes.map(q=>[quoteId(q.key),q]));
@@ -728,6 +760,9 @@ else {
     };
     await Promise.all([resolveInstrument(),readRules()]);
   } catch(error) { fail(error); }
+  await restoredPeriod;
+  seriesReady=true;
+  chartPeriod.disabled=false;
   void loadSeries();
   setInterval(()=>void loadSeries(),10_000);
   setInterval(()=>void readRules().catch(fail),7500);

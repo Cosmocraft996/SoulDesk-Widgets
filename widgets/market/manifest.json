@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "local.souldesk.market",
   "name": "币安行情与价格警报",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "hostApiMajor": 1,
   "loadCheck": 1,
   "entry": "dist/index.html",
