@@ -10,7 +10,7 @@ const host=await connectHost();
 document.body.className='market-body chart-body';
 document.body.innerHTML=`<main class="market-chart"><div class="chart-toolbar"><strong id="chart-title"></strong>
   <select id="chart-source" aria-label="价格来源"><option value="last">成交价</option><option value="mark">标记价</option></select>
-  <select id="chart-period" aria-label="K 线周期"><option value="1m">1 分</option><option value="5m" selected>5 分</option><option value="15m">15 分</option><option value="30m">30 分</option><option value="1h">1 时</option><option value="4h">4 时</option><option value="1d">1 日</option></select>
+  <select id="chart-period" aria-label="K 线周期"><option value="1m">1 分</option><option value="5m">5 分</option><option value="15m">15 分</option><option value="30m">30 分</option><option value="1h" selected>1 时</option><option value="4h">4 时</option><option value="1d">1 日</option></select>
   <button id="toggle-ma" type="button" aria-pressed="true">MA</button><button id="ma-config" type="button">MA 设置</button><button id="toggle-boll" type="button" aria-pressed="true">BOLL</button><button id="toggle-oi" type="button" aria-pressed="true">OI</button>
   <button id="chart-reset" type="button">回到最新</button><button id="chart-history" type="button">触发历史</button></div>
   <p id="chart-error" class="market-message" role="status" hidden></p>
@@ -38,7 +38,8 @@ const duration={ '1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1h':3600000,
 const defaultVisible=64, rightPadding=3, pageSize=500;
 const indicators={ma:true,boll:true,oi:isPerp};
 const canvas=$('chart-canvas');
-let period='5m', source=isPerp&&requestedSource==='mark'?'mark':'last', maPeriods=[...defaultMa], bars=[], interest=[], seriesWarning='', oiWarning='';
+const chartPeriod=$('chart-period');
+let period=chartPeriod.value, source=isPerp&&requestedSource==='mark'?'mark':'last', maPeriods=[...defaultMa], bars=[], interest=[], seriesWarning='', oiWarning='';
 $('chart-source').value=source;
 let visible=defaultVisible, offset=0, priceRange=null, cursor=null, drag=null, scale=null;
 let loading=false, flow=0, loadingHistory=false, historyDone=false, historyRetryAt=0;
@@ -567,7 +568,7 @@ $('chart-source').onchange=()=>{
   $('chart-source').value=source;
   void afterDraftSave(()=>{ source=requested; $('chart-source').value=source; clearDraft(); void loadSeries(true); });
 };
-$('chart-period').onchange=()=>{ period=$('chart-period').value; void loadSeries(true); };
+chartPeriod.onchange=()=>{ period=chartPeriod.value; void loadSeries(true); };
 $('chart-reset').onclick=()=>{ resetView(); draw(); };
 const point=event=>{ const rect=canvas.getBoundingClientRect(); return {x:event.clientX-rect.left,y:event.clientY-rect.top}; };
 const ruleAt=({x,y})=>ruleLabels.find(label=>x>=label.left&&x<=label.right&&y>=label.top&&y<=label.bottom)?.rule;
