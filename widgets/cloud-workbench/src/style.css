@@ -1,0 +1,59 @@
+:root {
+  color-scheme: dark;
+  font-family: 'Microsoft YaHei UI', 'PingFang SC', sans-serif;
+  --surface: #14232b;
+  --line: #37515b;
+  --ink: #eef6f3;
+  --sub: #afc3c8;
+  --online: #8fe1b4;
+  --warning: #ffce8c;
+  --error: #ffa6a3;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); }
+main {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 38px 12px 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 3px 8px; }
+h1 { margin: 0; font-size: 16px; font-weight: 650; }
+time { font-size: 11px; color: var(--sub); font-variant-numeric: tabular-nums; }
+.readings { flex: 1; min-height: 0; overflow: auto; margin-top: 8px; scrollbar-width: thin; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; }
+thead { color: var(--sub); }
+th, td { height: 34px; border-bottom: 1px solid var(--line); text-align: right; font-weight: 400; padding: 0 0 0 4px; }
+thead th { height: 24px; font-size: 11px; }
+tr > :first-child { width: auto; padding-left: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+tr > :nth-child(2) { width: 61px; text-align: left; }
+tr > :nth-child(n+3) { width: 37px; }
+td.metric { font-family: 'Cascadia Mono', Consolas, monospace; font-variant-numeric: tabular-nums; }
+td.running { color: var(--online); }
+td.warning { color: var(--warning); }
+td.error { color: var(--error); }
+td.muted { color: var(--sub); }
+p { margin: 0; font-size: 12px; line-height: 1.5; color: var(--sub); }
+#status { padding: 12px 0; }
+footer { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-right: 26px; }
+button {
+  flex: none;
+  min-height: 30px;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { background: #253940; border-color: #65868b; }
+button:focus-visible { outline: 2px solid var(--online); outline-offset: 2px; }
+button:disabled { cursor: default; color: var(--sub); }
+#action-error { color: var(--error); }

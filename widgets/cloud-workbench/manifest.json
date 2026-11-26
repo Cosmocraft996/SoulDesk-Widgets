@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "local.souldesk.cloud-workbench",
+  "name": "云服务器工作台",
+  "version": "0.1.5",
+  "hostApiMajor": 1,
+  "loadCheck": 1,
+  "entry": "dist/index.html",
+  "defaultSize": { "width": 360, "height": 345 },
+  "minSize": { "width": 300, "height": 320 },
+  "capabilities": ["cloud-workbench.read", "cloud-workbench.manage", "cloud-workbench.wake"],
+  "settingsSchema": { "type": "object", "properties": {}, "additionalProperties": false }
+}

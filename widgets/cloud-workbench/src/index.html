@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>云服务器工作台</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>云服务器工作台</h1>
+      <time id="last-cycle" hidden></time>
+    </header>
+    <div class="readings">
+      <table aria-label="服务器资源用量">
+        <thead><tr><th scope="col">服务器</th><th scope="col">状态</th><th scope="col">CPU</th><th scope="col">内存</th><th scope="col">磁盘</th></tr></thead>
+        <tbody id="servers"></tbody>
+      </table>
+      <p id="status" role="status">正在连接本机工作台…</p>
+    </div>
+    <footer>
+      <button id="open-console" type="button" disabled><span>打开控制台 ↗</span></button>
+      <p id="action-error" role="status" hidden></p>
+    </footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

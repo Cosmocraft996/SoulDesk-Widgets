@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="本机云服务器资源监控工作台">
+  <title>云服务器 · 管理工作台</title>
+  <link rel="stylesheet" href="./console.css">
+  <script type="module" src="./console.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><img src="./console-icon.svg" alt=""><span>云服务器<small>管理工作台</small></span></div>
+    <nav aria-label="工作台导航">
+      <button class="nav-item active" data-view="overview"><span>◫</span>资源总览</button>
+      <button class="nav-item" data-view="alerts"><span>◉</span>异常与提醒 <b id="nav-alerts">—</b></button>
+      <button class="nav-item" data-view="events"><span>≡</span>事件记录</button>
+    </nav>
+  </aside>
+  <main>
+    <header class="page-header">
+      <div><h1 id="page-title">资源总览<span class="title-dot"></span></h1></div>
+      <div class="header-actions"><div class="sync-state" id="sync-state" role="status">正在读取采集状态…</div><button class="button" id="refresh"><span class="refresh-symbol">↻</span>立即采集</button></div>
+    </header>
+    <div class="connection-error" id="connection-error" role="alert" hidden></div>
+    <section class="stats" aria-label="资源汇总">
+      <article class="stat"><span class="stat-label">实例运行状态</span><div class="stat-value" id="online-stat">—<small>台</small></div><div class="stat-foot" id="online-foot">等待首次采集</div></article>
+      <article class="stat"><span class="stat-label">在线 CPU 均值 <span>02</span></span><div class="stat-value" id="cpu-stat">—<small>%</small></div><div class="stat-foot" id="cpu-foot">按在线实例核数加权</div></article>
+      <article class="stat"><span class="stat-label">在线内存用量 <span>03</span></span><div class="stat-value" id="memory-stat">—<small>GiB</small></div><div class="stat-foot" id="memory-foot">仅汇总新鲜的采集数据</div></article>
+      <article class="stat alert-stat"><span class="stat-label">当前异常提醒 <span>04</span></span><div class="stat-value" id="alert-stat">—<small>项</small></div><div class="stat-foot" id="alert-foot">等待首次采集</div></article>
+    </section>
+    <section id="overview-view">
+      <section class="panel fleet-panel">
+        <div class="panel-header fleet-header">
+          <div class="section-title"><h2>服务器清单</h2><span class="count" id="fleet-count">—</span></div>
+          <div class="fleet-actions">
+            <button class="button" id="import-servers" disabled>导入服务器</button>
+            <button class="button" id="export-servers" title="完整备份包含服务器配置与凭据" disabled>导出服务器</button>
+            <button class="button primary" id="add-server" disabled>添加服务器</button>
+          </div>
+        </div>
+        <div class="fleet-filters">
+          <div class="filters"><label class="search"><span>⌕</span><input id="search" type="search" placeholder="搜索名称、账号或地址" aria-label="搜索服务器"></label><select id="provider-filter" aria-label="按服务类型筛选"><option value="all">全部类型</option><option value="aliyun">Linux SSH</option><option value="instabox">Instabox</option></select></div>
+          <span class="muted" id="order-note">拖动手柄排序</span>
+        </div>
+        <div class="table-scroll"><table class="fleet-table"><thead><tr><th>实例 / 用途</th><th>运行状态</th><th>CPU</th><th>内存</th><th>磁盘</th><th>数据时间</th><th>操作</th></tr></thead><tbody id="fleet-body"><tr><td colspan="7" class="empty">正在读取服务器清单…</td></tr></tbody></table></div>
+        <div class="panel-footer"><span><i class="tiny-dot"></i>导出包含凭据，请妥善保管备份文件。</span><span id="interval-note">正在读取采集设置</span></div>
+      </section>
+      <div class="detail-grid" id="server-panels" hidden>
+        <section class="panel trend-panel">
+          <div class="panel-header"><div><div class="eyebrow">选中实例</div><h2 id="selected-name">等待选择</h2><div class="selected-subtitle" id="selected-subtitle">—</div></div><div class="range-control" role="group" aria-label="历史时间范围"><button data-hours="1">1 小时</button><button data-hours="24" class="active">24 小时</button><button data-hours="168">7 天</button></div></div>
+          <div class="chart-heading"><div class="chart-tabs"><button class="active" data-chart="resources">CPU 与内存</button><button data-chart="network">网络速率</button></div><div class="chart-legend" id="chart-legend"><span><i></i>CPU</span><span><i></i>内存</span></div></div>
+          <div class="chart-wrap" id="chart" aria-live="polite"><div class="chart-empty">首次采集完成后显示趋势</div></div>
+          <p class="chart-caption" id="chart-caption">只记录实际采样点，暂停和采集间断保留空缺。</p>
+          <div class="service-section"><div class="section-title"><h3>服务健康</h3><span class="muted">只读检查</span></div><div id="services" class="services"><div class="empty">等待首次采集</div></div></div>
+        </section>
+        <aside class="panel detail-panel"><div class="panel-header"><h2>实例详情</h2><span class="small-label">LIVE / CACHE</span></div><div id="server-detail" class="server-detail"><p class="muted">正在加载…</p></div></aside>
+      </div>
+      <section class="panel recent-events"><div class="panel-header"><h2>最近事件</h2><button class="text-button" id="all-events">查看全部 →</button></div><div id="recent-events"></div></section>
+    </section>
+    <section class="panel" id="alerts-view" hidden><div class="panel-header"><h2>异常与提醒</h2><span class="muted">按当前采集结果更新</span></div><div id="alerts-list" class="message-list"></div></section>
+    <section class="panel" id="events-view" hidden><div class="panel-header"><h2>事件记录</h2><span class="muted">最近 60 条 · 北京时间</span></div><div id="events-list" class="message-list"></div></section>
+    <footer class="page-footer"><span>云服务器管理工作台</span><span>仅本机访问 · 真实采集数据 · 北京时间</span></footer>
+  </main>
+  <dialog id="server-editor" aria-labelledby="editor-title">
+    <form id="server-form" autocomplete="off">
+      <h2 id="editor-title">添加服务器</h2>
+      <div class="editor-grid">
+        <label>名称<input name="serverName" maxlength="100" required autofocus></label>
+        <label>用途 <small>可选</small><input name="role" maxlength="100"></label>
+        <label>类型<select name="provider"><option value="aliyun">Linux SSH</option><option value="instabox">Instabox</option></select></label>
+      </div>
+      <fieldset id="ssh-fields">
+        <legend>SSH 连接</legend>
+        <div class="editor-grid ssh-grid">
+          <label>主机地址<input name="sshHost" maxlength="253" required></label>
+          <label>用户名<input name="sshUser" maxlength="128" required></label>
+          <label>端口<input name="sshPort" type="number" min="1" max="65535" value="22" required></label>
+        </div>
+        <label>SSH 私钥文件<input name="privateKey" type="file" aria-describedby="credential-note"></label>
+        <label>可信 SSH 主机公钥<textarea name="hostKey" rows="2" maxlength="32768" placeholder="每行一条，以 ssh-ed25519 等公钥类型开头" aria-describedby="credential-note"></textarea></label>
+        <details class="editor-extra">
+          <summary>服务与健康检查</summary>
+          <label>系统服务 <small>每行一个服务名</small><textarea name="services" rows="2"></textarea></label>
+          <label>健康检查 <small>服务器回环地址，每行填写「名称 | 地址」</small><textarea name="healthUrls" rows="2"></textarea></label>
+        </details>
+      </fieldset>
+      <fieldset id="instabox-fields" hidden disabled>
+        <legend>Instabox 连接</legend>
+        <div class="editor-grid">
+          <label>工作区编号<input name="orgId" maxlength="128" required></label>
+          <label>实例编号<input name="machineId" maxlength="128" required></label>
+          <label>账号备注 <small>可选</small><input name="account" maxlength="100"></label>
+        </div>
+        <label>API 密钥<input name="apiKey" type="password" maxlength="4096" aria-describedby="credential-note"></label>
+      </fieldset>
+      <p class="muted" id="credential-note"></p>
+      <details class="editor-extra">
+        <summary>服务入口</summary>
+        <label>链接 <small>每行填写「名称 | 地址」</small><textarea name="links" rows="2"></textarea></label>
+      </details>
+      <p class="editor-error" id="editor-error" role="alert" hidden></p>
+      <div class="dialog-actions"><button class="button" id="cancel-server" type="button">取消</button><button class="button primary" id="save-server" type="submit">保存</button></div>
+    </form>
+  </dialog>
+  <dialog id="delete-dialog" aria-labelledby="delete-title">
+    <form method="dialog">
+      <h2 id="delete-title">移除服务器</h2>
+      <p id="delete-description"></p>
+      <p class="muted">云端实例继续保留。本机历史按保留期清理。</p>
+      <p class="editor-error" id="delete-error" role="alert" hidden></p>
+      <div class="dialog-actions"><button class="button" id="cancel-delete" value="cancel">取消</button><button class="button danger" id="confirm-delete" type="button">确认移除</button></div>
+    </form>
+  </dialog>
+  <dialog id="wake-dialog"><form method="dialog"><div class="dialog-icon">↗</div><h2>唤醒实例</h2><p id="wake-description"></p><p class="muted">这会让实例开始运行，可能消耗平台运行额度。原有自动暂停设置保持不变。</p><div class="dialog-actions"><button class="button" value="cancel">取消</button><button class="button primary" id="confirm-wake" type="button">确认唤醒</button></div></form></dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>
