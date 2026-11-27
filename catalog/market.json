@@ -6,6 +6,21 @@
   "screenshots": [],
   "versions": [
     {
+      "version": "0.3.12",
+      "capabilities": [
+        "storage.instance",
+        "market.read",
+        "market.chart",
+        "alerts.manage"
+      ],
+      "sizeBytes": 130658,
+      "sha256": "bb4577f49b2a7dad6adec7e440862e5887fd6799a1082496e6fef9f43e23403c",
+      "minHostVersion": "0.5.13",
+      "releaseNotes": "- 独立 K 线新增「指标模板」下拉框和适用范围、用途说明。「EMA 三通道」自动切到日线，显示 EMA 144/169、288/338、576/676。\n- 自动分页补齐日线。切到其他周期时显示常规指标，切回日线恢复通道。模板按组件实例记忆。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-market-v0.3.12/local.souldesk.market-0.3.12.zip"
+    },
+    {
       "version": "0.3.10",
       "capabilities": [
         "storage.instance",
