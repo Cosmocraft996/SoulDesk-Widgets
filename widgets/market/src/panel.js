@@ -29,8 +29,10 @@ const message = (id,text='') => { $(id).textContent=text; $(id).hidden=!text; };
 const report = error => message('panel-message',error?.message ?? String(error ?? ''));
 let items=[], catalog=new Map(), rules=[], quotes=new Map(), marketTickers={}, marketStatus={};
 let minuteQuotes=new Map();
-let layout='list', range=ranges[1], unsubscribe, editing=null, dragging=null, saving=false, refreshing=false, historyRun=0, quoteRun=0;
+let layout='list', range=ranges[1], unsubscribe, editing=null, dragging=null, saving=false, refreshing=false, quoteRun=0;
 const history=new Map();
+const historyPending=new Set();
+let scrollHistoryTimer, historyOptions=true;
 const rowMap=new Map();
 const root=$('watch-rows');
 const selectedItem = () => catalog.get($('watch-choice').value) ?? items.find(item=>marketId(item)===$('watch-choice').value);
@@ -162,20 +164,44 @@ function paintRows() {
 }
 
 async function loadHistory() {
-  const generation=++historyRun, selected=range, queue=[...items];
-  const worker=async()=>{
-    while(queue.length && generation===historyRun) {
-      const item=queue.shift(), id=marketId(item);
-      try {
-        const result=await host.request('market.candles',{key:quoteKey(item),interval:selected.period,limit:Math.ceil(selected.hours*60/selected.minutes)+2});
-        if (generation===historyRun) history.set(id,{rows:result.rows,at:Date.now(),error:false});
-      } catch(error) {
-        if (generation===historyRun) history.set(id,{rows:history.get(id)?.rows ?? [],at:history.get(id)?.at,error:true});
+  if (document.hidden||historyPending.size) return;
+  const selected=range, intervalMs=selected.minutes*60_000;
+  const limit=Math.ceil(selected.hours*60/selected.minutes)+2;
+  const viewport=root.getBoundingClientRect();
+  if (!viewport.height) return;
+  for (const item of items) {
+    if (selected!==range||document.hidden) break;
+    const id=marketId(item), rect=rowMap.get(id)?.row.getBoundingClientRect();
+    const old=history.get(id), now=Date.now();
+    if (!rect||rect.bottom<=viewport.top||rect.top>=viewport.bottom||now<(old?.nextAt??0)) continue;
+    const tail=old?.rows.at(-1)?.time;
+    const left=tail&&Math.ceil((now-tail)/intervalMs)+2;
+    const args={key:quoteKey(item),interval:selected.period,limit};
+    historyPending.add(id);
+    try {
+      let result;
+      if (historyOptions) {
+        try {
+          const patch=old?.rows.length>=limit&&left>0&&left<limit?{startTime:tail,limit:left}:{};
+          result=await host.request('market.candles',{...args,...patch,background:true});
+        } catch(error) {
+          if (!/unknown field|未知参数/i.test(error.message)) throw error;
+          historyOptions=false;
+        }
       }
-      if (generation===historyRun) paintRows();
+      result??=await host.request('market.candles',args);
+      if (selected!==range) continue;
+      const byTime=new Map((old?.rows??[]).map(row=>[row.time,row]));
+      for (const row of result.rows) byTime.set(row.time,row);
+      history.set(id,{rows:[...byTime.values()].sort((a,b)=>a.time-b.time).slice(-limit),at:now,
+        nextAt:now+(result.stale?60_000:intervalMs),error:!!result.stale});
+    } catch {
+      if (selected===range) history.set(id,{rows:old?.rows??[],at:old?.at??now,nextAt:now+60_000,error:true});
+    } finally {
+      historyPending.delete(id);
+      if (selected===range) paintRows();
     }
-  };
-  await Promise.all(Array.from({length:Math.min(4,queue.length)},worker));
+  }
 }
 
 function paintStatus() {
@@ -310,5 +336,10 @@ else {
     if (refreshing) return; refreshing=true;
     void refreshInfo().catch(report).finally(()=>{refreshing=false;});
   },5000);
-  setInterval(()=>void loadHistory(),32_000);
+  setInterval(()=>void loadHistory(),15_000);
+  root.addEventListener('scroll',()=>{
+    clearTimeout(scrollHistoryTimer);
+    scrollHistoryTimer=setTimeout(()=>void loadHistory(),120);
+  },{passive:true});
+  document.addEventListener('visibilitychange',()=>{ if (!document.hidden) void loadHistory(); });
 }

@@ -1,4 +1,5 @@
 import {connectHost} from './host.js';
+import {indicatorTemplates,emaSeries} from './chart-indicators.js';
 import {comparePrice,directionAtPrice} from './price.js';
 import {$,marketName,pair,marketId,quoteKey,quoteId,formatPrice,percentage,tone,timeText,element,canvasContext,drawLine,ruleStatus} from './market-ui.js';
 
@@ -11,11 +12,13 @@ document.body.className='market-body chart-body';
 document.body.innerHTML=`<main class="market-chart"><div class="chart-toolbar"><strong id="chart-title"></strong>
   <select id="chart-source" aria-label="价格来源"><option value="last">成交价</option><option value="mark">标记价</option></select>
   <select id="chart-period" aria-label="K 线周期" disabled><option value="1m">1 分</option><option value="5m">5 分</option><option value="15m">15 分</option><option value="30m">30 分</option><option value="1h" selected>1 时</option><option value="4h">4 时</option><option value="1d">1 日</option></select>
+  <label class="chart-template">指标模板<select id="chart-template" aria-describedby="chart-template-description" disabled><option value="default">默认指标</option></select></label>
   <button id="toggle-ma" type="button" aria-pressed="true">MA</button><button id="ma-config" type="button">MA 设置</button><button id="toggle-boll" type="button" aria-pressed="true">BOLL</button><button id="toggle-oi" type="button" aria-pressed="true">OI</button>
   <button id="chart-reset" type="button">回到最新</button><button id="chart-history" type="button">触发历史</button></div>
   <p id="chart-error" class="market-message" role="status" hidden></p>
-  <p id="chart-period-error" class="market-message" role="status" hidden></p>
+  <p id="chart-view-error" class="market-message" role="status" hidden></p>
   <div class="chart-layout"><section class="chart-data"><div class="chart-legend"><strong id="chart-market"></strong><span id="chart-ohlc"></span><span id="candle-change"></span><span id="chart-indicators"></span></div>
+  <p id="chart-template-description" class="market-hint" hidden></p>
   <div id="chart-stage"><canvas id="chart-canvas" role="img" aria-label="价格 K 线、成交量、指标和警报线"></canvas><div id="chart-empty" role="status">等待币安历史 K 线</div><button id="pick-alert" type="button" hidden>在此价位新建警报</button></div>
   <p id="chart-foot" class="market-hint">底部滚轮缩放时间 · 右轴滚轮缩放价格 · 拖动平移</p><p id="chart-save-status" class="market-hint" role="status" hidden></p></section>
   <aside class="chart-rules"><div class="dialog-head"><h2>价格警报 <small id="rules-count"></small></h2><button id="all-rules" type="button">全部警报</button></div>
@@ -36,15 +39,23 @@ document.body.innerHTML=`<main class="market-chart"><div class="chart-toolbar"><
 
 const defaultMa=[5,10,30], maColors=['#e5b16a','#c094e0','#67c0ba','#a9d985','#a9c8ff','#f48a9e'];
 const duration={ '1m':60000,'5m':300000,'15m':900000,'30m':1800000,'1h':3600000,'4h':14400000,'1d':86400000 };
-const defaultVisible=64, rightPadding=3, pageSize=500;
+const defaultVisible=64, rightPadding=3, pageSize=499;
 const indicators={ma:true,boll:true,oi:isPerp};
 const canvas=$('chart-canvas');
 const chartPeriod=$('chart-period');
+const chartTemplate=$('chart-template');
+for (const [id,{name}] of Object.entries(indicatorTemplates)) {
+  const option=element('option',name);
+  option.value=id;
+  chartTemplate.append(option);
+}
 let period=chartPeriod.value, source=isPerp&&requestedSource==='mark'?'mark':'last', maPeriods=[...defaultMa], bars=[], interest=[], seriesWarning='', oiWarning='';
-let chartStorage=null, seriesReady=false;
+let templateId=chartTemplate.value, emaCache=null, seriesReady=false;
 $('chart-source').value=source;
 let visible=defaultVisible, offset=0, priceRange=null, cursor=null, drag=null, scale=null;
-let loading=false, flow=0, loadingHistory=false, historyDone=false, historyRetryAt=0;
+let loading=false, flow=0, loadingHistory=false, historyDone=false, historyRetryAt=0, historyEndTime=null;
+let historyOptions=true, liveSupported=true, liveBusy=false, liveGeneration=null, liveLease=null;
+let liveRows=[], liveEvent=null, restSynced=false, nextSeriesAt=0, nextOiAt=0, lastLiveAt=0, gapStart=null, sourceNow=0;
 let rules=[], quotes=new Map(), editing=null, saving=false, draftSide='up', draftPrice=null, draftTouched=false;
 let ruleLabels=[], pendingLevel=null, rulesRequest=0;
 let draftId=null, autoSaveTimer=null, savePending=false, waitingForQuote=false;
@@ -52,28 +63,42 @@ const sourceQuote=()=>quotes.get(quoteId(quoteKey(instrument,source)));
 const freshQuote=()=>{ const q=sourceQuote(); return q?.quality==='fresh'?q:null; };
 const message=(id,value='')=>{ $(id).textContent=value; $(id).hidden=!value; };
 const fail=error=>message('chart-error',error?.message ?? String(error));
+const selectedTemplate=()=>Object.hasOwn(indicatorTemplates,templateId)?indicatorTemplates[templateId]:null;
+const activeTemplate=()=>{
+  const template=selectedTemplate();
+  return template?.interval===period?template:null;
+};
 
-async function restoreChartPeriod() {
+function updateTemplateControls() {
+  const template=selectedTemplate();
+  const active=template?.interval===period;
+  for (const id of ['toggle-ma','ma-config','toggle-boll']) $(id).hidden=active;
+  message('chart-template-description',template?`${template.description}${active?'':'切回日线即可显示通道。'}`:'');
+}
+
+async function restoreChartView() {
   try {
-    chartStorage=await host.request('storage.get');
-    const saved=chartStorage?.chartPeriod;
-    if (typeof saved==='string'&&Object.hasOwn(duration,saved)) period=chartPeriod.value=saved;
+    const saved=await host.request('storage.get');
+    const savedPeriod=saved?.chartPeriod, savedTemplate=saved?.chartIndicatorTemplate;
+    if (typeof savedPeriod==='string'&&Object.hasOwn(duration,savedPeriod)) period=chartPeriod.value=savedPeriod;
+    if (typeof savedTemplate==='string'&&Object.hasOwn(indicatorTemplates,savedTemplate)) templateId=chartTemplate.value=savedTemplate;
+    updateTemplateControls();
   } catch(error) {
-    message('chart-period-error',`无法读取上次 K 线周期：${error.message}`);
+    message('chart-view-error',`无法读取上次 K 线周期和指标模板：${error.message}`);
   }
 }
 
-async function rememberChartPeriod(selected) {
+async function rememberChartView() {
   if (host.preview) return;
-  chartPeriod.disabled=true;
+  chartPeriod.disabled=chartTemplate.disabled=true;
   try {
-    const saved=chartStorage??await host.request('storage.get');
-    chartStorage=await host.request('storage.set',{...saved,chartPeriod:selected});
-    message('chart-period-error');
+    const saved=await host.request('storage.get');
+    await host.request('storage.set',{...saved,chartPeriod:period,chartIndicatorTemplate:templateId});
+    message('chart-view-error');
   } catch(error) {
-    message('chart-period-error',`K 线周期未保存：${error.message}`);
+    message('chart-view-error',`K 线周期和指标模板未保存：${error.message}`);
   } finally {
-    chartPeriod.disabled=false;
+    chartPeriod.disabled=chartTemplate.disabled=false;
   }
 }
 
@@ -95,13 +120,13 @@ $('ma-form').onsubmit=async event=>{
   event.preventDefault(); const settings=parsePeriods($('ma-periods').value);
   if (!settings) { message('ma-error','请输入 1–6 个互不重复的 1–200 整数。'); return; }
   $('ma-save').disabled=true;
-  try { await host.request('market.preferences',{maPeriods:settings.join(',')}); maPeriods=settings; indicators.ma=true; $('toggle-ma').setAttribute('aria-pressed','true'); $('ma-dialog').close(); draw(); }
+  try { await host.request('market.preferences',{maPeriods:settings.join(',')}); maPeriods=settings; indicators.ma=true; $('toggle-ma').setAttribute('aria-pressed','true'); $('ma-dialog').close(); draw(); if (bars.length<initialLimit()) void loadSeries(false,true); }
   catch(error) { message('ma-error',error.message); }
   finally { $('ma-save').disabled=false; }
 };
 for (const key of Object.keys(indicators)) $(`toggle-${key}`).onclick=()=>{
   indicators[key]=!indicators[key]; $(`toggle-${key}`).setAttribute('aria-pressed',indicators[key]);
-  draw(); if (key==='oi'&&indicators.oi) void loadSeries();
+  draw(); if (key==='oi'&&indicators.oi) { nextOiAt=0; refreshInterest(); }
 };
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
@@ -119,12 +144,27 @@ function mergeRows(existing,incoming,keepExisting=false) {
   if (!incoming.length) return existing;
   const start=firstAt(existing,incoming[0].time), end=firstAt(existing,incoming.at(-1).time+1);
   const byTime=new Map(existing.slice(start,end).map(row=>[row.time,row]));
-  for (const row of incoming) if (!keepExisting||!byTime.has(row.time)) byTime.set(row.time,row);
+  for (const row of incoming) {
+    const previous=byTime.get(row.time);
+    if (previous?.closed===true&&row.closed!==true) continue;
+    if (keepExisting&&previous&&(previous.closed===true||row.closed!==true)) continue;
+    byTime.set(row.time,row);
+  }
   return existing.slice(0,start).concat([...byTime.values()].sort((a,b)=>a.time-b.time),existing.slice(end));
 }
 
-function oldestOffset() {
-  return Math.max(0,(bars.at(-1).time-bars[0].time)/duration[period]+1-visible);
+function confirmedRows(rows,before) {
+  return rows.map((row,index)=>row.closeTime<before||rows[index+1]?.time>row.closeTime
+    ? {...row,closed:true}:row);
+}
+
+function seriesFailure(error) {
+  return /RATE_LIMITED\b|HTTP\s+(?:429|418)\b/i.test(error?.message??error??'')
+    ? '币安限流，稍后自动重试':'上次 K 线更新失败';
+}
+
+function oldestOffset(earliest=bars[0].time) {
+  return Math.max(0,(bars.at(-1).time-earliest)/duration[period]+1-visible);
 }
 
 function resetView(count=defaultVisible) {
@@ -132,33 +172,121 @@ function resetView(count=defaultVisible) {
   canvas.removeAttribute('data-chart-cursor'); $('pick-alert').hidden=true;
 }
 
-async function loadSeries(reset=false) {
+function initialLimit() {
+  return Math.min(pageSize,Math.max(99,Math.ceil(visible)+Math.max(20,...maPeriods)-1));
+}
+
+function applyBars(rows) {
+  const previousLatest=bars.at(-1)?.time;
+  bars=mergeRows(bars,rows);
+  if (previousLatest&&offset>rightPadding) offset+=(bars.at(-1).time-previousLatest)/duration[period];
+}
+
+function releaseLive() {
+  if (liveLease) void host.request('market.candleLive',{...liveLease,release:true}).catch(()=>{});
+  liveLease=null;
+}
+
+async function loadSeries(reset=false,full=false) {
   if (!seriesReady||(loading&&!reset)) return;
   if (reset) {
+    releaseLive();
     flow++; bars=[]; interest=[]; seriesWarning=''; oiWarning='';
-    loadingHistory=false; historyDone=false; historyRetryAt=0;
+    emaCache=null;
+    liveRows=[]; liveEvent=null; liveGeneration=null; restSynced=false; gapStart=null; nextSeriesAt=0; nextOiAt=0; lastLiveAt=0;
+    loadingHistory=false; historyDone=false; historyRetryAt=0; historyEndTime=null;
     resetView(visible); draw();
   }
   const generation=flow;
   loading=true;
-  const key=quoteKey(instrument,source), interval=period;
-  if (isPerp&&indicators.oi) void loadInterest(generation);
+  const key=quoteKey(instrument,source), interval=period, limit=activeTemplate()?pageSize:initialLimit();
+  const args={key,interval,limit};
+  nextSeriesAt=Date.now()+Math.max(60_000,Math.min(duration[interval],300_000));
+  refreshInterest();
   try {
-    const {rows}=await host.request('market.candles',{key,interval,limit:pageSize});
+    if (!bars.length&&historyOptions) {
+      try {
+        const saved=await host.request('market.candles',{...args,cachedOnly:true});
+        if (generation!==flow) return;
+        applyBars(confirmedRows(saved.rows,Infinity));
+        if (bars.length) { seriesWarning='正在更新，已显示本地缓存'; draw(); }
+      } catch(error) {
+        if (/unknown field|未知参数/i.test(error.message)) historyOptions=false;
+      }
+    }
     if (generation!==flow) return;
-    const previousLatest=bars.at(-1)?.time;
-    bars=mergeRows(bars,rows);
-    if (previousLatest&&offset>rightPadding) offset+=(bars.at(-1).time-previousLatest)/duration[interval];
-    seriesWarning=rows.length?'':'暂未取得 K 线';
+    const missing=gapStart;
+    const after=missing??bars.at(-1)?.time;
+    const tailCount=after&&Math.ceil((Date.now()-after)/duration[interval])+2;
+    if (historyOptions&&restSynced&&!full&&bars.length>=limit&&tailCount>0&&tailCount<limit) {
+      args.startTime=after; args.limit=Math.max(2,tailCount);
+    }
+    // 请求前的交易所时间用于确认已收盘，避免把跨收盘返回的旧快照误当成最终值。
+    const before=sourceNow-5000;
+    const {rows,stale,warning}=await host.request('market.candles',args);
+    if (generation!==flow) return;
+    applyBars(confirmedRows(rows,stale?Infinity:before));
+    applyBars(liveRows);
+    if (!stale) {
+      restSynced=true;
+      if (gapStart===missing) {
+        if (missing!==null&&args.startTime===undefined&&rows.length===limit&&rows[0].time>missing+duration[interval]) {
+          historyEndTime=rows[0].time-1;
+          historyDone=false; historyRetryAt=0;
+        }
+        gapStart=null;
+      }
+    }
+    seriesWarning=stale?seriesFailure(warning):bars.length?'':'暂未取得 K 线';
   } catch(error) {
-    if (generation===flow) seriesWarning=error?.message ?? 'K 线更新失败';
+    if (generation===flow) seriesWarning=seriesFailure(error);
   } finally {
-    if (generation===flow) { loading=false; draw(); }
+    if (generation===flow) { loading=false; draw(); void loadOlder(true); }
   }
 }
 
+async function pollLive() {
+  if (!seriesReady||document.hidden||source!=='last'||!liveSupported||liveBusy) return;
+  liveBusy=true;
+  const generation=flow, args={key:quoteKey(instrument),interval:period};
+  liveLease=args;
+  try {
+    const next=await host.request('market.candleLive',args);
+    if (generation!==flow) return;
+    const newConnection=next.connected&&next.generation!==liveGeneration;
+    if (!next.connected||newConnection) {
+      if (liveGeneration!==null&&bars.length) gapStart??=bars.at(-1).time;
+      liveRows=[]; liveEvent=null;
+    }
+    liveGeneration=next.connected?next.generation:null;
+    if (!next.rows.length) return;
+    const previous=bars.at(-1)?.time;
+    if (previous&&next.rows[0].time>previous+duration[period]&&gapStart===null) {
+      gapStart=previous;
+      nextSeriesAt=0;
+    }
+    if (newConnection&&gapStart!==null) nextSeriesAt=0;
+    if (next.eventTime!==liveEvent) lastLiveAt=Date.now();
+    liveEvent=next.eventTime;
+    liveRows=next.rows;
+    applyBars(liveRows);
+    if (gapStart!==null&&Date.now()>=nextSeriesAt) void loadSeries();
+    draw();
+  } catch(error) {
+    if (/METHOD_NOT_FOUND|未知业务接口/.test(error.message)) liveSupported=false;
+  } finally { liveBusy=false; }
+}
+
+function refreshInterest() {
+  if (!isPerp||!indicators.oi||document.hidden||Date.now()<nextOiAt) return;
+  nextOiAt=Date.now()+duration[period==='1m'?'5m':period];
+  void loadInterest(flow);
+}
+
 async function loadInterest(generation,endTime) {
-  const args={key:quoteKey(instrument),interval:period==='1m'?'5m':period,limit:pageSize};
+  const interval=period==='1m'?'5m':period;
+  const limit=endTime===undefined?Math.min(pageSize,Math.ceil(initialLimit()*duration[period]/duration[interval])+5):pageSize;
+  const args={key:quoteKey(instrument),interval,limit};
   if (endTime!==undefined) args.endTime=endTime;
   try {
     const {rows}=await host.request('market.openInterest',args);
@@ -167,34 +295,61 @@ async function loadInterest(generation,endTime) {
     interest=mergeRows(interest,rows,endTime!==undefined);
     if (endTime===undefined) oiWarning='';
   } catch(error) {
-    if (generation===flow&&endTime===undefined) oiWarning=error?.message ?? '未平仓量更新失败';
+    if (generation===flow&&endTime===undefined) {
+      oiWarning=error?.message ?? '未平仓量更新失败';
+      nextOiAt=Date.now()+60_000;
+    }
   }
   if (generation===flow) draw();
 }
 
-async function loadOlder() {
-  if (!bars.length||oldestOffset()-offset>Math.max(32,visible/2)||loadingHistory||historyDone||Date.now()<historyRetryAt) return;
-  const generation=flow, earliest=bars[0].time;
-  const endTime=earliest-1;
+function needsEmaHistory(distance) {
+  const template=activeTemplate();
+  // 多取一些日线，降低 EMA 初始值对可见区域的影响。
+  return template&&distance<template.minimumBars*3;
+}
+
+async function loadOlder(emaOnly=false) {
+  if (emaOnly&&(!activeTemplate()||loading||document.hidden)) return;
+  if (!bars.length||loadingHistory||historyDone||Date.now()<historyRetryAt) return;
+  const endTime=historyEndTime??bars[0].time-1, earliest=endTime+1;
+  const distance=oldestOffset(earliest)-offset;
+  if (!needsEmaHistory(distance)&&(emaOnly||distance>Math.max(32,visible/2))) return;
   if (endTime<=0) { historyDone=true; draw(); return; }
+  const generation=flow;
+  // 限流时返回的缓存可先绘制，分页位置在这一页确认后才前移。
+  historyEndTime=endTime;
   loadingHistory=true; historyRetryAt=0; draw();
+  let fullPage=false;
   try {
-    const {rows}=await host.request('market.candles',{key:quoteKey(instrument,source),interval:period,limit:pageSize,endTime});
+    const {rows,stale}=await host.request('market.candles',{key:quoteKey(instrument,source),interval:period,limit:pageSize,endTime});
     if (generation!==flow) return;
     const older=rows.filter(row=>row.time<earliest);
-    historyDone=!older.length;
-    bars=mergeRows(bars,older,true);
+    if (historyEndTime===endTime) {
+      historyDone=!stale&&!older.length;
+      if (stale) historyRetryAt=Date.now()+30_000;
+      else if (older.length) {
+        historyEndTime=older[0].time-1;
+        fullPage=older.length===pageSize;
+      }
+    }
+    bars=mergeRows(bars,confirmedRows(older,stale?Infinity:earliest),true);
     if (older.length&&isPerp&&indicators.oi&&earliest>Date.now()-30*86400000&&earliest<(interest[0]?.time??Infinity)) {
       void loadInterest(generation,earliest);
     }
   } catch {
-    if (generation===flow) historyRetryAt=Date.now()+10_000;
+    if (generation===flow&&historyEndTime===endTime) historyRetryAt=Date.now()+10_000;
   } finally {
-    if (generation===flow) { loadingHistory=false; draw(); }
+    if (generation===flow) {
+      loadingHistory=false;
+      draw();
+      if (fullPage) void loadOlder(true);
+    }
   }
 }
 
 function activeBar(last) {
+  if (typeof last.closed==='boolean') return last;
   const q=freshQuote();
   if (!q||q.sourceUtcMs<last.time||q.sourceUtcMs>last.closeTime) return last;
   const live={...last,close:q.price};
@@ -214,6 +369,18 @@ function overlays(data, first, last, length, deviations=false) {
     return {mean,upper:mean+2*Math.sqrt(variance),lower:mean-2*Math.sqrt(variance)};
   });
 }
+function emaChannels(template, first, last) {
+  const latest=bars.at(-1), live=activeBar(latest);
+  if (emaCache?.bars!==bars||emaCache.template!==template||emaCache.close!==live.close) {
+    const data=live.close===latest.close?bars:[...bars.slice(0,-1),live];
+    const values=template.channels.map(({periods})=>periods.map(length=>emaSeries(data,length,duration[period])));
+    emaCache={bars,template,close:live.close,values};
+  }
+  return template.channels.map((channel,i)=>{
+    const [short,long]=emaCache.values[i].map(values=>values.slice(first,last));
+    return {...channel,short:short.map((value,index)=>long[index]===null?null:value),long};
+  });
+}
 function pricePlaces() {
   return Math.min(20,Math.max(2,...[instrument.tickSize,sourceQuote()?.price,bars.at(-1)?.close].map(value=>value?.split('.')[1]?.replace(/0+$/,'').length ?? 0)));
 }
@@ -228,12 +395,14 @@ function draw() {
   if (!context) { scale=null; return; }
   const {ctx,width,height}=context;
   const tf=duration[period], showVolume=source==='last', showOi=indicators.oi&&isPerp;
+  const template=activeTemplate();
   $('chart-market').textContent=`币安 · ${marketName(instrument)} · ${source==='last'?'成交价':'标记价'}`;
   $('chart-empty').hidden=bars.length>0;
   $('chart-empty').textContent=seriesWarning||'等待币安历史 K 线';
-  const historyStatus=loadingHistory?'正在加载更早的 K 线':historyRetryAt?'历史加载失败，稍后可继续拖动重试':
+  const historyStatus=loadingHistory?(template?'正在补齐 EMA 日线历史':'正在加载更早的 K 线'):
+    historyRetryAt?(template?'历史加载失败，稍后自动重试':'历史加载失败，稍后可继续拖动重试'):
     historyDone&&bars.length&&oldestOffset()-offset<1?'已到最早可用 K 线':'';
-  $('chart-foot').textContent=[seriesWarning&&bars.length?'上次 K 线更新失败':'底部滚轮缩放时间 · 右轴滚轮缩放价格 · 拖动平移 · 右键选价',
+  $('chart-foot').textContent=[(bars.length&&seriesWarning)||'底部滚轮缩放时间 · 右轴滚轮缩放价格 · 拖动平移 · 右键选价',
     historyStatus,showOi&&oiWarning?'OI 更新失败':showOi&&period==='1m'?'OI 每 5 分钟采样':''].filter(Boolean).join(' · ');
   if (!bars.length || width<120 || height<135) { scale=null; $('chart-ohlc').textContent=''; $('candle-change').textContent=''; $('chart-indicators').textContent=''; return; }
   const plot={left:12,right:width-98,top:16,axis:height-26};
@@ -248,11 +417,16 @@ function draw() {
   const data=bars.slice(warmup,last), start=first-warmup, end=data.length;
   if (end&&last===bars.length) data[end-1]=activeBar(data[end-1]);
   const rows=data.slice(start);
-  const ma=indicators.ma?maPeriods.map(length=>overlays(data,start,end,length)):[];
-  const boll=indicators.boll?overlays(data,start,end,20,true):[];
+  const ma=!template&&indicators.ma?maPeriods.map(length=>overlays(data,start,end,length)):[];
+  const boll=!template&&indicators.boll?overlays(data,start,end,20,true):[];
+  const ema=template?emaChannels(template,first,last):[];
+  if (rows.length&&template&&ema.some(({long})=>long.every(value=>value===null))) {
+    $('chart-foot').textContent+=` · 部分通道需要更多日线历史，最长需 ${template.minimumBars} 根连续日线`;
+  }
   const rangeRows=rows.length?rows:[bars[first]??bars.at(-1)];
   const rangeValues=rangeRows.flatMap(row=>[Number(row.low),Number(row.high)]);
   rangeValues.push(...ma.flat().filter(p=>p!==null),...boll.filter(Boolean).flatMap(row=>[row.lower,row.upper]));
+  for (const {short,long} of ema) rangeValues.push(...short.filter(p=>p!==null),...long.filter(p=>p!==null));
   const rawLow=Math.min(...rangeValues), rawHigh=Math.max(...rangeValues), spread=rawHigh-rawLow || rawHigh*.004;
   const draft=$('chart-rule-form').hidden?null:Number($('alert-threshold').value)||null;
   const onSource=rules.filter(({rule,state})=>rule.key.priceKind===source&&rule.enabled&&!state.completed);
@@ -298,9 +472,27 @@ function draw() {
     });
     ctx.stroke();
   }
+  function drawChannel({short,long,color}) {
+    ctx.fillStyle=`${color}28`;
+    let start=0;
+    for (let end=0;end<=long.length;end++) {
+      if (end<long.length&&long[end]!==null) continue;
+      if (end-start>1) {
+        ctx.beginPath();
+        ctx.moveTo(x(rows[start].time),y(short[start]));
+        for (let i=start+1;i<end;i++) ctx.lineTo(x(rows[i].time),y(short[i]));
+        for (let i=end-1;i>=start;i--) ctx.lineTo(x(rows[i].time),y(long[i]));
+        ctx.closePath(); ctx.fill();
+      }
+      start=end+1;
+    }
+    drawSeries(short,color);
+    drawSeries(long,color);
+  }
   const body=Math.max(1,Math.min(16,step*.65));
   ctx.save(); ctx.beginPath(); ctx.rect(plot.left,plot.top,plot.right-plot.left,plot.bottom-plot.top); ctx.clip();
   if (boll.length) for (const [field,color] of [['upper','#7096bc'],['mean','#62798e'],['lower','#7096bc']]) drawSeries(boll.map(value=>value?.[field]??null),color);
+  ema.forEach(drawChannel);
   for (const row of rows) {
     const up=comparePrice(row.close,row.open)>=0, color=up?'#65d9b2':'#f98f89', lineX=x(row.time);
     const open=y(Number(row.open)), close=y(Number(row.close));
@@ -320,6 +512,12 @@ function draw() {
   }
   const labels=ma.map((_,i)=>{ const el=element('span',`MA${maPeriods[i]}`); el.style.color=maColors[i]; return el; });
   if (boll.length) labels.push(element('span','BOLL 20 / 2'));
+  for (const {periods,color,long} of ema) {
+    if (!long.some(value=>value!==null)) continue;
+    const label=element('span',`EMA ${periods.join('/')}`);
+    label.style.color=color;
+    labels.push(label);
+  }
   $('chart-indicators').replaceChildren(...labels);
 
   if (showOi) {
@@ -597,8 +795,20 @@ $('chart-source').onchange=()=>{
 chartPeriod.onchange=()=>{
   if (chartPeriod.disabled||!Object.hasOwn(duration,chartPeriod.value)||chartPeriod.value===period) return;
   period=chartPeriod.value;
-  void rememberChartPeriod(period);
+  updateTemplateControls();
+  void rememberChartView();
   void loadSeries(true);
+};
+chartTemplate.onchange=()=>{
+  if (chartTemplate.disabled||chartTemplate.value===templateId) return;
+  templateId=chartTemplate.value;
+  const interval=selectedTemplate()?.interval;
+  const switched=Boolean(interval&&interval!==period);
+  if (switched) period=chartPeriod.value=interval;
+  updateTemplateControls();
+  void rememberChartView();
+  if (switched) void loadSeries(true);
+  else { priceRange=null; draw(); void loadOlder(true); }
 };
 $('chart-reset').onclick=()=>{ resetView(); draw(); };
 const point=event=>{ const rect=canvas.getBoundingClientRect(); return {x:event.clientX-rect.left,y:event.clientY-rect.top}; };
@@ -742,9 +952,10 @@ new ResizeObserver(draw).observe($('chart-stage'));
 await host.ready();
 if (host.preview) $('chart-empty').textContent='隔离试加载';
 else {
-  const restoredPeriod=restoreChartPeriod();
+  const restoredView=restoreChartView();
   void host.subscribe(isPerp?[quoteKey(instrument),quoteKey(instrument,'mark')]:[quoteKey(instrument)],snapshot=>{
     if (snapshot.error&&!snapshot.quotes) { fail(snapshot.error); return; }
+    sourceNow=snapshot.marketStatus?.[market]?.sourceNow??0;
     quotes=new Map(snapshot.quotes.map(q=>[quoteId(q.key),q]));
     if (!$('chart-rule-form').hidden&&!editing&&!draftTouched&&!$('alert-threshold').value&&freshQuote()) $('alert-threshold').value=defaultThreshold(draftSide);
     if (waitingForQuote&&freshQuote()) queueDraftSave();
@@ -760,10 +971,22 @@ else {
     };
     await Promise.all([resolveInstrument(),readRules()]);
   } catch(error) { fail(error); }
-  await restoredPeriod;
+  await restoredView;
   seriesReady=true;
-  chartPeriod.disabled=false;
+  chartPeriod.disabled=chartTemplate.disabled=false;
   void loadSeries();
-  setInterval(()=>void loadSeries(),10_000);
+  void pollLive();
+  setInterval(()=>void pollLive(),1000);
+  setInterval(()=>{
+    if (document.hidden) return;
+    refreshInterest();
+    if (Date.now()>=nextSeriesAt&&(!restSynced||source==='mark'||Date.now()-lastLiveAt>=60_000||gapStart!==null||!bars.length)) void loadSeries();
+    void loadOlder(true);
+  },5000);
+  document.addEventListener('visibilitychange',()=>{
+    if (document.hidden) releaseLive();
+    else { void pollLive(); refreshInterest(); }
+  });
+  window.addEventListener('pagehide',releaseLive);
   setInterval(()=>void readRules().catch(fail),7500);
 }
