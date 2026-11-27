@@ -1,0 +1,23 @@
+{
+  "id": "local.souldesk.binance-account",
+  "name": "币安账户监控",
+  "summary": "在桌面查看币安账户的持仓、保证金和委托。支持持仓排序、断线自动恢复，以及经宿主确认的委托操作。",
+  "category": "行情与警报",
+  "screenshots": [],
+  "versions": [
+    {
+      "version": "0.1.5",
+      "capabilities": [
+        "storage.instance",
+        "binance.account.read",
+        "binance.account.trade"
+      ],
+      "sizeBytes": 49703,
+      "sha256": "23d2ebcec24f9cde23821fa8e61f399c69dde473a2b3370b16996fbf719fbb51",
+      "minHostVersion": "0.5.13",
+      "releaseNotes": "- 账户或持仓读取中断时保留最近一次成功的数据，显示原更新时间，并逐步延长自动重试间隔。\n- 账户读取与交易回执使用独立提示。接口恢复后自动清除连接报错。",
+      "status": "published",
+      "downloadUrl": "https://github.com/Cosmocraft996/SoulDesk-Widgets/releases/download/widget-binance-account-v0.1.5/local.souldesk.binance-account-0.1.5.zip"
+    }
+  ]
+}
