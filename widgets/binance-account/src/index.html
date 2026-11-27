@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>币安账户监控</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <main id="app" aria-label="币安账户监控">
+    <header class="title"><h1>币安账户监控</h1><span id="connection" class="muted">正在连接宿主</span></header>
+    <div id="controls" class="controls"></div>
+    <div id="balance"></div>
+    <p id="connection-message" class="notice" role="status" hidden></p>
+    <p id="message" class="notice" role="status" hidden></p>
+    <div id="pending"></div>
+    <section id="content" aria-label="当前账户"></section>
+    <footer id="footer"></footer>
+  </main>
+  <dialog id="dialog" aria-labelledby="dialog-title">
+    <header class="title"><h2 id="dialog-title"></h2><button type="button" data-action="dismiss">关闭</button></header>
+    <div id="dialog-body"></div>
+  </dialog>
+</body>
+</html>

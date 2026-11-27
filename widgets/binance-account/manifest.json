@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "local.souldesk.binance-account",
+  "name": "币安账户监控",
+  "version": "0.1.5",
+  "hostApiMajor": 1,
+  "loadCheck": 1,
+  "entry": "dist/index.html",
+  "defaultSize": {"width": 450, "height": 490},
+  "minSize": {"width": 250, "height": 280},
+  "capabilities": ["storage.instance", "binance.account.read", "binance.account.trade"],
+  "settingsSchema": {
+    "type": "object",
+    "properties": {
+      "market": {"type": "string", "maxLength": 12, "default": "usd"},
+      "mode": {"type": "string", "maxLength": 12, "default": "compact"}
+    },
+    "additionalProperties": false
+  }
+}
